@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { login, storeToken } from './api';
 import type { LoginData } from './api';
 
+
 const schema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
