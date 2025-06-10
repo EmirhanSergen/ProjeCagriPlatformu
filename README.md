@@ -20,6 +20,8 @@ cp .env.example .env
 docker-compose up --build
 ```
 
+The `.env` file now also includes an `ALLOWED_ORIGINS` variable used for CORS. By default it allows requests from `http://localhost:5173`.
+
 The API exposes a `/users/` endpoint to register new users. The sample `.env` file points the backend to the local Postgres container.
 
 Additional endpoints:
