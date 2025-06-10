@@ -1,7 +1,9 @@
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { login, storeToken, LoginData } from './api';
+import { login, storeToken } from './api';
+import type { LoginData } from './api';
+
 
 const schema = z.object({
   email: z.string().email(),

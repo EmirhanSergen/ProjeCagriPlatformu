@@ -1,7 +1,9 @@
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { registerUser, RegisterData } from './api';
+import { registerUser } from './api';
+import type { RegisterData } from './api';
+
 
 const schema = z.object({
   email: z.string().email(),
