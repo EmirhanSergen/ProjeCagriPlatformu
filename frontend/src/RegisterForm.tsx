@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { registerUser } from './api';
 import type { RegisterData } from './api';
+import { useToast } from './ToastProvider';
 
 
 const schema = z.object({
@@ -17,10 +18,11 @@ function RegisterForm() {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<RegisterData>({ resolver: zodResolver(schema) });
+  const { showToast } = useToast();
 
   const onSubmit = async (data: RegisterData) => {
     await registerUser(data);
-    alert('Registered successfully');
+    showToast('Registered successfully', 'success');
   };
 
   return (
@@ -35,7 +37,12 @@ function RegisterForm() {
         {errors.password && <p className="text-red-600">{errors.password.message}</p>}
       </div>
       <div>
-        <input {...register('role')} placeholder="Role" className="border p-2 w-full" />
+        <select {...register('role')} className="border p-2 w-full">
+          <option value="">Select role</option>
+          <option value="applicant">Applicant</option>
+          <option value="reviewer">Reviewer</option>
+          <option value="admin">Admin</option>
+        </select>
         {errors.role && <p className="text-red-600">{errors.role.message}</p>}
       </div>
       <button disabled={isSubmitting} className="bg-blue-500 text-white px-4 py-2 rounded">
