@@ -5,7 +5,9 @@ This project aims to provide a multi-role web platform for managing academic and
 ## Repository Structure
 
 - `frontend/` – React + TypeScript application
-- `backend/` – FastAPI server (initial skeleton)
+- `backend/` – FastAPI server
+
+
 
 ## Development
 
@@ -17,6 +19,8 @@ cd backend
 cp .env.example .env
 docker-compose up --build
 ```
+
+The API exposes a `/users/` endpoint to register new users. The sample `.env` file points the backend to the local Postgres container.
 
 ```bash
 # Start frontend
