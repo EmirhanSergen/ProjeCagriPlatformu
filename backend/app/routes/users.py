@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 
+
 from ..database import SessionLocal, Base, engine
 from ..schemas.user import UserCreate, UserOut, UserLogin
 from ..crud.user import get_user_by_email, create_user
@@ -16,8 +17,6 @@ auth_router = APIRouter()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
-# Ensure tables created (simplified)
-Base.metadata.create_all(bind=engine)
 
 def get_db():
     db = SessionLocal()
