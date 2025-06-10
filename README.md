@@ -7,6 +7,8 @@ This project aims to provide a multi-role web platform for managing academic and
 - `frontend/` – React + TypeScript application
 - `backend/` – FastAPI server
 
+
+
 ## Development
 
 The frontend uses Vite and Tailwind CSS. The backend runs FastAPI and PostgreSQL via Docker Compose.

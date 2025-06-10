@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 
+
 from .routes import users
 
 app = FastAPI()
@@ -8,4 +9,6 @@ app = FastAPI()
 async def root():
     return {"message": "Hello from FastAPI"}
 
+
 app.include_router(users.router)
+
