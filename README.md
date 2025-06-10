@@ -22,6 +22,11 @@ docker-compose up --build
 
 The API exposes a `/users/` endpoint to register new users. The sample `.env` file points the backend to the local Postgres container.
 
+Additional endpoints:
+
+- `POST /calls/` &mdash; create a new project call (admin only).
+- `POST /applications/` &mdash; submit an application to a call.
+
 ```bash
 # Start frontend
 cd frontend
