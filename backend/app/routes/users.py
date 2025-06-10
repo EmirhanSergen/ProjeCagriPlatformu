@@ -1,14 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from ..database import SessionLocal, Base, engine
+from ..database import SessionLocal
 from ..schemas.user import UserCreate, UserOut
 from ..crud.user import get_user_by_email, create_user
 
 router = APIRouter(prefix="/users", tags=["users"])
 
-# Ensure tables created (simplified)
-Base.metadata.create_all(bind=engine)
 
 def get_db():
     db = SessionLocal()
