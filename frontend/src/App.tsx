@@ -1,10 +1,10 @@
-import Navbar from './Navbar'
-import { ToastProvider } from './ToastProvider'
-import RegisterPage from './RegisterPage'
-import LoginPage from './LoginPage'
-import CallsPage from './CallsPage'
-import HomePage from './HomePage'
-import AboutPage from './AboutPage'
+import Navbar from './components/Navbar'
+import { ToastProvider } from './components/ToastProvider'
+import RegisterPage from './pages/RegisterPage'
+import LoginPage from './pages/LoginPage'
+import CallsPage from './pages/CallsPage'
+import HomePage from './pages/HomePage'
+import AboutPage from './pages/AboutPage'
 import { Routes, Route } from 'react-router-dom'
 
 

@@ -1,8 +1,8 @@
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { registerUser } from './api';
-import type { RegisterData } from './api';
+import { registerUser } from '../api';
+import type { RegisterData } from '../api';
 import { useToast } from './ToastProvider';
 
 
