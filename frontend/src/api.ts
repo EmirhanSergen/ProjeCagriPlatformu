@@ -117,3 +117,30 @@ export async function uploadDocuments(
     xhr.send(data);
   });
 }
+
+export interface Attachment {
+  id: number;
+  application_id: number;
+  file_path: string;
+}
+
+export async function fetchApplicationDocuments(callId: number): Promise<Attachment[]> {
+  const res = await fetch(`${API_BASE}/applications/${callId}/attachments`, {
+    headers: { ...authHeaders() },
+  });
+  if (!res.ok) {
+    throw new Error('Failed to fetch documents');
+  }
+  return res.json();
+}
+
+export async function confirmDocuments(callId: number) {
+  const res = await fetch(`${API_BASE}/applications/${callId}/confirm`, {
+    method: 'POST',
+    headers: { ...authHeaders() },
+  });
+  if (!res.ok) {
+    throw new Error('Failed to confirm documents');
+  }
+  return res.json();
+}

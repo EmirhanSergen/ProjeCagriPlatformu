@@ -10,7 +10,6 @@ def create_attachment(db: Session, application_id: int, file_path: str) -> Attac
     db.refresh(attachment)
     return attachment
 
-
 def get_attachments_by_application(db: Session, application_id: int) -> list[Attachment]:
     return db.query(Attachment).filter(Attachment.application_id == application_id).all()
 
@@ -33,4 +32,5 @@ def attachments_confirmed(db: Session, application_id: int) -> bool:
         )
         .first()
         is not None
+
     )

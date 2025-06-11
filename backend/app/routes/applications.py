@@ -17,6 +17,7 @@ from ..crud.attachment import (
     get_attachments_by_application,
 )
 
+
 router = APIRouter(prefix="/applications", tags=["applications"])
 
 
@@ -63,6 +64,7 @@ def upload_application_files(
     return attachments
 
 
+
 @router.post("/{call_id}/confirm")
 def confirm_application_files(
     call_id: int,
@@ -83,3 +85,4 @@ def confirm_application_files(
 
     confirm_attachments(db, application.id)
     return {"detail": "Attachments confirmed"}
+
