@@ -5,7 +5,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { login, storeToken } from './api';
 import type { LoginData } from './api';
 import { useToast } from './ToastProvider';
-import RoleSlider, { Role } from './RoleSlider';
+import RoleSlider from './RoleSlider';
+import type { Role } from './RoleSlider';
 
 
 const schema = z.object({
