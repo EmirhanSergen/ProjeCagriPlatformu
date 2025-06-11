@@ -89,12 +89,13 @@ export async function fetchCalls(onlyOpen = false): Promise<Call[]> {
 }
 
 export async function uploadDocuments(
+  callId: number,
   files: File[],
   onProgress?: (percent: number) => void,
 ) {
   return new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', `${API_BASE}/documents/upload`);
+    xhr.open('POST', `${API_BASE}/applications/${callId}/upload`);
     const token = getToken();
     if (token) {
       xhr.setRequestHeader('Authorization', `Bearer ${token}`);
