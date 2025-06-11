@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class ApplicationCreate(BaseModel):
@@ -12,5 +12,4 @@ class ApplicationOut(BaseModel):
     call_id: int
     content: str
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)

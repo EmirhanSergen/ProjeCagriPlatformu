@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class AttachmentOut(BaseModel):
@@ -7,5 +7,4 @@ class AttachmentOut(BaseModel):
     file_path: str
     is_confirmed: bool
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
