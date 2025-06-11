@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage'
 import CallsPage from './pages/CallsPage'
 import HomePage from './pages/HomePage'
 import AboutPage from './pages/AboutPage'
+import ApplicationPreview from './pages/ApplicationPreview'
 import { Routes, Route } from 'react-router-dom'
 
 
@@ -21,6 +22,7 @@ function App() {
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/calls" element={<CallsPage />} />
+            <Route path="/applications/:callId/preview" element={<ApplicationPreview />} />
           </Routes>
         </main>
       </div>
