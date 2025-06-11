@@ -9,7 +9,9 @@ from ..dependencies import get_current_admin
 from ..models.user import User
 
 from ..models.call import Call
+from ..models.user import User as UserModel
 from ..schemas.call import CallCreate, CallOut, CallUpdate
+from ..schemas.application import ApplicationDetail
 from ..crud.call import create_call, get_call, update_call, delete_call
 from ..crud.application import get_applications_by_call
 from ..crud.attachment import get_attachments_by_application
@@ -44,6 +46,34 @@ def read_call(call_id: int, db: Session = Depends(get_db)):
     if not call:
         raise HTTPException(status_code=404, detail="Call not found")
     return call
+
+
+@router.get("/{call_id}/applications", response_model=list[ApplicationDetail])
+def list_call_applications(
+    call_id: int,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin),
+):
+    call = get_call(db, call_id)
+    if not call:
+        raise HTTPException(status_code=404, detail="Call not found")
+    apps = get_applications_by_call(db, call_id)
+    result = []
+    for app in apps:
+        user = db.query(UserModel).filter(UserModel.id == app.user_id).first()
+        attachments = get_attachments_by_application(db, app.id)
+        result.append(
+            {
+                "id": app.id,
+                "user_id": app.user_id,
+                "call_id": app.call_id,
+                "content": app.content,
+                "documents_confirmed": app.documents_confirmed,
+                "user_email": user.email if user else "",
+                "attachments": attachments,
+            }
+        )
+    return result
 
 
 @router.put("/{call_id}", response_model=CallOut)

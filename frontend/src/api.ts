@@ -165,6 +165,16 @@ export interface Attachment {
   file_path: string;
 }
 
+export interface ApplicationDetail {
+  id: number;
+  user_id: number;
+  call_id: number;
+  content: string;
+  documents_confirmed: boolean;
+  user_email: string;
+  attachments: Attachment[];
+}
+
 export async function fetchAttachments(callId: number): Promise<Attachment[]> {
   const res = await fetch(`${API_BASE}/applications/${callId}/attachments`, {
     headers: { ...authHeaders() },
@@ -182,6 +192,18 @@ export async function confirmDocuments(callId: number) {
   });
   if (!res.ok) {
     throw new Error('Failed to confirm documents');
+  }
+  return res.json();
+}
+
+export async function fetchApplications(
+  callId: number,
+): Promise<ApplicationDetail[]> {
+  const res = await fetch(`${API_BASE}/calls/${callId}/applications`, {
+    headers: { ...authHeaders() },
+  });
+  if (!res.ok) {
+    throw new Error('Failed to fetch applications');
   }
   return res.json();
 }

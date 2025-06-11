@@ -9,6 +9,7 @@ import HomePage from './pages/HomePage'
 import AboutPage from './pages/AboutPage'
 import ApplicationPreview from './pages/ApplicationPreview'
 import CallManagementPage from './pages/CallManagementPage'
+import CallApplicationsPage from './pages/CallApplicationsPage'
 import { Routes, Route } from 'react-router-dom'
 
 
@@ -38,6 +39,14 @@ function App() {
                 element={
                   <PrivateRoute roles={['admin']}>
                     <CallManagementPage />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/admin/calls/:callId/applications"
+                element={
+                  <PrivateRoute roles={['admin']}>
+                    <CallApplicationsPage />
                   </PrivateRoute>
                 }
               />
