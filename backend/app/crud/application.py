@@ -14,3 +14,14 @@ def create_application(db: Session, call_id: int, content: str, user_id: int) ->
     db.commit()
     db.refresh(application)
     return application
+
+
+def get_application_by_user_and_call(
+    db: Session, user_id: int, call_id: int
+) -> Application | None:
+    """Return application for a given user and call."""
+    return (
+        db.query(Application)
+        .filter(Application.user_id == user_id, Application.call_id == call_id)
+        .first()
+    )
