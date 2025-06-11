@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 
 from .routes import users
-from .routes import calls, applications
+from .routes import calls, applications, documents
 from .config import settings
 from .database import Base, engine
 
@@ -32,5 +32,6 @@ app.include_router(users.router)
 app.include_router(users.auth_router)
 app.include_router(calls.router)
 app.include_router(applications.router)
+app.include_router(documents.router)
 
 

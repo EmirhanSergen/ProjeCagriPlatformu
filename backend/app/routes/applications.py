@@ -13,9 +13,11 @@ from ..crud.application import create_application, get_application_by_user_and_c
 from ..crud.attachment import (
     create_attachment,
     confirm_attachments,
+    confirm_attachment,
     attachments_confirmed,
     get_attachments_by_application,
 )
+from ..models.attachment import Attachment
 
 
 router = APIRouter(prefix="/applications", tags=["applications"])
@@ -39,6 +41,7 @@ def submit_application(
 @router.post("/{call_id}/upload", response_model=list[AttachmentOut])
 def upload_application_files(
     call_id: int,
+    document_id: int | None = None,
     files: List[UploadFile] = File(...),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -59,7 +62,7 @@ def upload_application_files(
         file_location = upload_dir / uploaded_file.filename
         with file_location.open("wb") as buffer:
             shutil.copyfileobj(uploaded_file.file, buffer)
-        attachment = create_attachment(db, application.id, str(file_location))
+        attachment = create_attachment(db, application.id, str(file_location), document_id=document_id)
         attachments.append(attachment)
     return attachments
 
@@ -85,6 +88,25 @@ def confirm_application_files(
 
     confirm_attachments(db, application.id)
     return {"detail": "Attachments confirmed"}
+
+
+@router.patch("/{call_id}/save")
+def save_attachment(
+    call_id: int,
+    attachment_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    application = get_application_by_user_and_call(db, current_user.id, call_id)
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+    attachment = (
+        db.query(Attachment).filter(Attachment.id == attachment_id, Attachment.application_id == application.id).first()
+    )
+    if not attachment:
+        raise HTTPException(status_code=404, detail="Attachment not found")
+    confirm_attachment(db, attachment.id)
+    return {"detail": "Attachment saved"}
 
 
 @router.get("/{call_id}/attachments", response_model=list[AttachmentOut])
