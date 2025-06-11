@@ -58,7 +58,10 @@ function LoginForm() {
         </label>
         {errors.password && <p className="text-red-600">{errors.password.message}</p>}
       </div>
-      <button disabled={isSubmitting} className="bg-green-500 text-white px-4 py-2 rounded">
+      <button
+        disabled={isSubmitting}
+        className="bg-green-500 text-white px-4 py-2 rounded mt-4"
+      >
         Login
       </button>
     </form>

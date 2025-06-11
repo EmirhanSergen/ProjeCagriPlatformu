@@ -10,7 +10,7 @@ function Navbar() {
             Project Call Platform
           </Link>
         </div>
-        <div className="flex justify-center space-x-6 flex-1">
+        <div className="flex justify-center space-x-12 flex-1">
           <Link to="/" className="hover:underline">Home</Link>
           <Link to="/calls" className="hover:underline">Calls</Link>
           <Link to="/about" className="hover:underline">About</Link>

@@ -26,7 +26,7 @@ function RegisterForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-2">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <h2 className="text-xl font-bold">Register</h2>
       <div>
         <label htmlFor="register-email" className="block">
@@ -69,7 +69,10 @@ function RegisterForm() {
         </label>
         {errors.role && <p className="text-red-600">{errors.role.message}</p>}
       </div>
-      <button disabled={isSubmitting} className="bg-blue-500 text-white px-4 py-2 rounded">
+      <button
+        disabled={isSubmitting}
+        className="bg-blue-500 text-white px-4 py-2 rounded mt-4"
+      >
         Register
       </button>
     </form>
