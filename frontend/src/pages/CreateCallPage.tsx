@@ -2,20 +2,20 @@ import { useFieldArray, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from 'react-router-dom'
-import { createCall, createDocumentDefinition } from '../api'
+import { apiCreateCallWithDefs } from '../api'
 import { useToast } from '../components/ToastProvider'
 
-const itemSchema = z.object({
+const docSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
-  allowed_format: z.enum(['pdf', 'image', 'text']),
+  allowed_formats: z.enum(['pdf', 'image', 'text']),
 })
 
 const schema = z.object({
   title: z.string().min(1),
   description: z.string().optional(),
   is_open: z.boolean().optional(),
-  items: z.array(itemSchema),
+  document_definitions: z.array(docSchema),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -28,19 +28,21 @@ export default function CreateCallPage() {
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: { items: [] } })
-  const { fields, append, remove } = useFieldArray({ control, name: 'items' })
+  } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: { document_definitions: [] } })
+  const { fields, append, remove } = useFieldArray({ control, name: 'document_definitions' })
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      const call = await createCall({ title: data.title, description: data.description, is_open: data.is_open })
-      for (const item of data.items) {
-        await createDocumentDefinition(call.id, {
-          name: item.name,
-          description: item.description,
-          allowed_formats: item.allowed_format,
-        })
-      }
+      await apiCreateCallWithDefs({
+        title: data.title,
+        description: data.description,
+        is_open: data.is_open,
+        document_definitions: data.document_definitions.map((d) => ({
+          name: d.name,
+          description: d.description,
+          allowed_formats: d.allowed_formats,
+        })),
+      })
       showToast('Call created', 'success')
       navigate('/admin/calls')
     } catch {
@@ -74,9 +76,9 @@ export default function CreateCallPage() {
         <h2 className="font-semibold">Required Items</h2>
         {fields.map((field, idx) => (
           <div key={field.id} className="border p-2 space-y-2 mb-2">
-            <input {...register(`items.${idx}.name` as const)} placeholder="Name" className="border p-1 w-full" />
-            <input {...register(`items.${idx}.description` as const)} placeholder="Description" className="border p-1 w-full" />
-            <select {...register(`items.${idx}.allowed_format` as const)} className="border p-1 w-full">
+            <input {...register(`document_definitions.${idx}.name` as const)} placeholder="Name" className="border p-1 w-full" />
+            <input {...register(`document_definitions.${idx}.description` as const)} placeholder="Description" className="border p-1 w-full" />
+            <select {...register(`document_definitions.${idx}.allowed_formats` as const)} className="border p-1 w-full">
               <option value="pdf">PDF</option>
               <option value="image">Image</option>
               <option value="text">Text</option>
@@ -84,7 +86,7 @@ export default function CreateCallPage() {
             <button type="button" onClick={() => remove(idx)} className="text-red-600 underline">Delete</button>
           </div>
         ))}
-        <button type="button" onClick={() => append({ name: '', description: '', allowed_format: 'pdf' })} className="bg-gray-200 px-2 py-1 rounded">
+        <button type="button" onClick={() => append({ name: '', description: '', allowed_formats: 'pdf' })} className="bg-gray-200 px-2 py-1 rounded">
           Add Item
         </button>
       </div>
