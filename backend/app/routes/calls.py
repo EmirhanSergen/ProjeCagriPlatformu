@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 
 from app.dependencies import get_db
@@ -49,10 +49,11 @@ def update_existing_call(
     call = get_call(db, call_id)
     if not call:
         raise HTTPException(status_code=404, detail="Call not found")
-    return update_call(db, call, call_in)
+    updated = update_call(db, call, call_in)
+    return updated
 
 
-@router.delete("/{call_id}", status_code=204)
+@router.delete("/{call_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_existing_call(
     call_id: int,
     db: Session = Depends(get_db),
@@ -62,4 +63,4 @@ def delete_existing_call(
     if not call:
         raise HTTPException(status_code=404, detail="Call not found")
     delete_call(db, call)
-    return None
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

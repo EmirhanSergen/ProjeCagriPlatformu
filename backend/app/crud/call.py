@@ -23,6 +23,7 @@ def update_call(db: Session, call: Call, call_in: CallUpdate) -> Call:
         call.description = call_in.description
     if call_in.is_open is not None:
         call.is_open = call_in.is_open
+    db.add(call)
     db.commit()
     db.refresh(call)
     return call
