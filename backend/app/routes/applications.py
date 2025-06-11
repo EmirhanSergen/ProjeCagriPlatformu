@@ -1,21 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from app.dependencies import get_db
 from ..dependencies import get_current_user
 from ..models.user import User
-from ..database import SessionLocal, Base, engine
 from ..schemas.application import ApplicationCreate, ApplicationOut
 from ..crud.application import create_application
 
 router = APIRouter(prefix="/applications", tags=["applications"])
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 @router.post("/", response_model=ApplicationOut)
