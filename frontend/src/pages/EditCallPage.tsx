@@ -17,7 +17,7 @@ const itemSchema = z.object({
   id: z.number().optional(),
   name: z.string().min(1),
   description: z.string().optional(),
-  allowed_format: z.enum(['pdf', 'image', 'text']),
+  allowed_formats: z.enum(['pdf', 'image', 'text']),
 })
 
 const schema = z.object({
@@ -49,17 +49,17 @@ export default function EditCallPage() {
     ;(async () => {
       const c = await fetchCall(id)
       const docs = await fetchDocumentDefinitions(id)
-      reset({
-        title: c.title,
-        description: c.description || '',
-        is_open: c.is_open,
-        items: docs.map((d) => ({
-          id: d.id,
-          name: d.name,
-          description: d.description || '',
-          allowed_format: d.allowed_formats as 'pdf' | 'image' | 'text',
-        })),
-      })
+        reset({
+          title: c.title,
+          description: c.description || '',
+          is_open: c.is_open,
+          items: docs.map((d) => ({
+            id: d.id,
+            name: d.name,
+            description: d.description || '',
+            allowed_formats: d.allowed_formats as 'pdf' | 'image' | 'text',
+          })),
+        })
     })()
   }, [id, reset])
 
@@ -78,18 +78,18 @@ export default function EditCallPage() {
         is_open: data.is_open,
       })
       for (const item of data.items) {
-        if (item.id) {
-          await updateDocumentDefinition(id, item.id, {
-            name: item.name,
-            description: item.description,
-            allowed_formats: item.allowed_format,
-          })
-        } else {
-          await createDocumentDefinition(id, {
-            name: item.name,
-            description: item.description,
-            allowed_formats: item.allowed_format,
-          })
+          if (item.id) {
+            await updateDocumentDefinition(id, item.id, {
+              name: item.name,
+              description: item.description,
+              allowed_formats: item.allowed_formats,
+            })
+          } else {
+            await createDocumentDefinition(id, {
+              name: item.name,
+              description: item.description,
+              allowed_formats: item.allowed_formats,
+            })
         }
       }
       showToast('Call updated', 'success')
@@ -127,7 +127,7 @@ export default function EditCallPage() {
           <div key={field.id} className="border p-2 space-y-2 mb-2">
             <input {...register(`items.${idx}.name` as const)} placeholder="Name" className="border p-1 w-full" />
             <input {...register(`items.${idx}.description` as const)} placeholder="Description" className="border p-1 w-full" />
-            <select {...register(`items.${idx}.allowed_format` as const)} className="border p-1 w-full">
+              <select {...register(`items.${idx}.allowed_formats` as const)} className="border p-1 w-full">
               <option value="pdf">PDF</option>
               <option value="image">Image</option>
               <option value="text">Text</option>
@@ -135,7 +135,7 @@ export default function EditCallPage() {
             <button type="button" onClick={() => onDeleteDoc(idx, field.id as number | undefined)} className="text-red-600 underline">Delete</button>
           </div>
         ))}
-        <button type="button" onClick={() => append({ name: '', description: '', allowed_format: 'pdf' })} className="bg-gray-200 px-2 py-1 rounded">
+        <button type="button" onClick={() => append({ name: '', description: '', allowed_formats: 'pdf' })} className="bg-gray-200 px-2 py-1 rounded">
           Add Item
         </button>
       </div>
