@@ -25,7 +25,9 @@ def submit_application(
     current_user: User = Depends(get_current_user),
 ):
     try:
-        application = create_application(db, app_in)
+        application = create_application(
+            db, app_in.call_id, app_in.content, current_user.id
+        )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
     return application
