@@ -20,9 +20,10 @@ interface FormValues {
 
 interface Props {
   callId: number
+  documentId: number
 }
 
-export default function DocumentUploadForm({ callId }: Props) {
+export default function DocumentUploadForm({ callId, documentId }: Props) {
   const {
     register,
     handleSubmit,
@@ -37,7 +38,7 @@ export default function DocumentUploadForm({ callId }: Props) {
   const onSubmit = handleSubmit(async ({ documents }) => {
     const files = Array.from(documents)
     try {
-      await uploadDocuments(callId, files, setProgress)
+      await uploadDocuments(callId, documentId, files, setProgress)
       showToast('Files uploaded successfully', 'success')
       reset()
     } catch {

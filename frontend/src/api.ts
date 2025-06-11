@@ -130,12 +130,13 @@ export async function deleteCall(id: number): Promise<void> {
 
 export async function uploadDocuments(
   callId: number,
+  documentId: number,
   files: File[],
   onProgress?: (percent: number) => void,
 ) {
   return new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', `${API_BASE}/applications/${callId}/upload`);
+    xhr.open('POST', `${API_BASE}/applications/${callId}/upload?document_id=${documentId}`);
     const token = getToken();
     if (token) {
       xhr.setRequestHeader('Authorization', `Bearer ${token}`);
@@ -194,6 +195,33 @@ export async function confirmDocuments(callId: number) {
     throw new Error('Failed to confirm documents');
   }
   return res.json();
+}
+
+export interface DocumentDefinition {
+  id: number
+  call_id: number
+  name: string
+  allowed_formats: string
+}
+
+export async function createDocumentDefinition(callId: number, data: { name: string; allowed_formats: string }): Promise<DocumentDefinition[]> {
+  const res = await fetch(`${API_BASE}/admin/calls/${callId}/documents`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) {
+    throw new Error('Failed to save document definition')
+  }
+  return res.json()
+}
+
+export async function fetchDocumentDefinitions(callId: number): Promise<DocumentDefinition[]> {
+  const res = await fetch(`${API_BASE}/applications/${callId}/documents`, { headers: { ...authHeaders() } })
+  if (!res.ok) {
+    throw new Error('Failed to load document definitions')
+  }
+  return res.json()
 }
 
 export async function fetchApplications(
