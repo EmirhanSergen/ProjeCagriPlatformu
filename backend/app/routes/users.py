@@ -1,21 +1,20 @@
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
-from jose import jwt, JWTError
+from jose import jwt
 from passlib.context import CryptContext
 
 
-from ..database import SessionLocal, Base, engine
+from ..database import SessionLocal
 from ..schemas.user import UserCreate, UserOut, UserLogin
 from ..crud.user import get_user_by_email, create_user
 from ..models.user import User
+from ..dependencies import get_current_user
 from ..config import settings
 
 router = APIRouter(prefix="/users", tags=["users"])
 auth_router = APIRouter()
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
 
 def get_db():
@@ -28,19 +27,6 @@ def get_db():
 def create_access_token(data: dict) -> str:
     return jwt.encode(data, settings.jwt_secret, algorithm="HS256")
 
-def get_current_user(
-    token: str = Depends(oauth2_scheme),
-    db: Session = Depends(get_db),
-) -> User:
-    try:
-        payload = jwt.decode(token, settings.jwt_secret, algorithms=["HS256"])
-        user_id = int(payload.get("sub"))
-    except (JWTError, TypeError, ValueError):
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
-    return user
 
 @router.post("/", response_model=UserOut)
 def register_user(user_in: UserCreate, db: Session = Depends(get_db)):
