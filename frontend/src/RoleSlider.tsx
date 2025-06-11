@@ -26,9 +26,18 @@ function RoleSlider({ value, onChange }: RoleSliderProps) {
         step={1}
         value={index}
         onChange={handleChange}
-        className="w-full"
+        className="w-full accent-blue-500"
       />
-      <div className="text-center font-semibold capitalize">{value}</div>
+      <div className="flex justify-between text-sm font-medium capitalize">
+        {roles.map((r) => (
+          <span
+            key={r}
+            className={r === value ? 'text-blue-600 font-semibold' : ''}
+          >
+            {r}
+          </span>
+        ))}
+      </div>
     </div>
   );
 }

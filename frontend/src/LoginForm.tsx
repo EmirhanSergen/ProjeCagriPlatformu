@@ -1,12 +1,12 @@
-import { useForm } from 'react-hook-form';
-import { useState } from 'react';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { login, storeToken } from './api';
-import type { LoginData } from './api';
-import { useToast } from './ToastProvider';
-import RoleSlider from './RoleSlider';
-import type { Role } from './RoleSlider';
+import { useForm } from 'react-hook-form'
+import { useState } from 'react'
+import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { login, storeToken } from './api'
+import type { LoginData } from './api'
+import { useToast } from './ToastProvider'
+import RoleSlider from './RoleSlider'
+import type { Role } from './RoleSlider'
 
 
 const schema = z.object({
@@ -19,27 +19,20 @@ function LoginForm() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<Omit<LoginData, 'role'>>({ resolver: zodResolver(schema) });
-  const { showToast } = useToast();
-  const [step, setStep] = useState(1);
-  const [credentials, setCredentials] = useState<Omit<LoginData, 'role'>>({ email: '', password: '' });
-  const [role, setRole] = useState<Role>('applicant');
+  } = useForm<Omit<LoginData, 'role'>>({ resolver: zodResolver(schema) })
+  const { showToast } = useToast()
+  const [role, setRole] = useState<Role>('applicant')
 
-  const onSubmitCredentials = handleSubmit((data) => {
-    setCredentials(data);
-    setStep(2);
-  });
+  const onSubmit = handleSubmit(async (data) => {
+    const res = await login({ ...data, role })
+    storeToken(res.access_token)
+    showToast('Logged in!', 'success')
+  })
 
-  const submitLogin = async () => {
-    const res = await login({ ...credentials, role });
-    storeToken(res.access_token);
-    showToast('Logged in!', 'success');
-    setStep(1);
-  };
-
-  return step === 1 ? (
-    <form onSubmit={onSubmitCredentials} className="space-y-2">
+  return (
+    <form onSubmit={onSubmit} className="space-y-4">
       <h2 className="text-xl font-bold">Login</h2>
+      <RoleSlider value={role} onChange={setRole} />
       <div>
         <label htmlFor="login-email" className="block">
           Email
@@ -65,22 +58,14 @@ function LoginForm() {
         </label>
         {errors.password && <p className="text-red-600">{errors.password.message}</p>}
       </div>
-      <button disabled={isSubmitting} className="bg-green-500 text-white px-4 py-2 rounded">
-        Next
+      <button
+        disabled={isSubmitting}
+        className="bg-green-500 text-white px-4 py-2 rounded mt-4"
+      >
+        Login
       </button>
     </form>
-  ) : (
-    <div className="space-y-4">
-      <h2 className="text-xl font-bold">Select Role</h2>
-      <RoleSlider value={role} onChange={setRole} />
-      <div className="flex space-x-2">
-        <button onClick={() => setStep(1)} className="border px-4 py-2 rounded">Back</button>
-        <button onClick={submitLogin} disabled={isSubmitting} className="bg-green-500 text-white px-4 py-2 rounded flex-grow">
-          Login
-        </button>
-      </div>
-    </div>
-  );
+  )
 }
 
 export default LoginForm;
