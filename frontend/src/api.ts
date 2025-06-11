@@ -44,6 +44,33 @@ export function getToken() {
   return localStorage.getItem('token');
 }
 
+export function logout() {
+  localStorage.removeItem('token');
+}
+
+function authHeaders() {
+  const token = getToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+export interface ApplicationData {
+  user_id: number;
+  call_id: number;
+  content: string;
+}
+
+export async function submitApplication(data: ApplicationData) {
+  const res = await fetch(`${API_BASE}/applications/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    throw new Error('Failed to submit application');
+  }
+  return res.json();
+}
+
 export interface Call {
   id: number;
   title: string;
