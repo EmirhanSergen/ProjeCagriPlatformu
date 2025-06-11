@@ -29,6 +29,10 @@ When using Docker you can run the command inside the API container:
 docker-compose run --rm api alembic upgrade head
 ```
 
+The Docker image now bundles the `migrations/` directory and `alembic.ini`, so
+you can execute Alembic commands directly in the container. Rebuild the image
+whenever new migrations are added.
+
 ### Authentication
 
 Send a POST request to `/login` with `email` and `password`. After entering
