@@ -34,3 +34,8 @@ def confirm_documents(db: Session, application: Application) -> Application:
     db.commit()
     db.refresh(application)
     return application
+
+
+def get_applications_by_call(db: Session, call_id: int) -> list[Application]:
+    """Return all applications for a given call."""
+    return db.query(Application).filter(Application.call_id == call_id).all()
