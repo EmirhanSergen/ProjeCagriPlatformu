@@ -15,8 +15,7 @@ const schema = z.object({
   title: z.string().min(1),
   description: z.string().optional(),
   is_open: z.boolean().optional(),
-  document_definitions: z.array(docSchema).min(1),
-})
+  documents: z.array(docSchema),
 
 type FormValues = z.infer<typeof schema>
 
@@ -28,8 +27,8 @@ export default function CreateCallPage() {
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: { document_definitions: [] } })
-  const { fields, append, remove } = useFieldArray({ control, name: 'document_definitions' })
+  } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: { documents: [] } })
+  const { fields, append, remove } = useFieldArray({ control, name: 'documents' })
 
   const onSubmit = handleSubmit(async (data) => {
     try {
@@ -37,7 +36,7 @@ export default function CreateCallPage() {
         title: data.title,
         description: data.description,
         is_open: data.is_open,
-        document_definitions: data.document_definitions.map((d) => ({
+        documents: data.documents.map((d) => ({
           name: d.name,
           description: d.description,
           allowed_formats: d.allowed_formats,
@@ -76,9 +75,9 @@ export default function CreateCallPage() {
         <h2 className="font-semibold">Required Items</h2>
         {fields.map((field, idx) => (
           <div key={field.id} className="border p-2 space-y-2 mb-2">
-            <input {...register(`document_definitions.${idx}.name` as const)} placeholder="Name" className="border p-1 w-full" />
-            <input {...register(`document_definitions.${idx}.description` as const)} placeholder="Description" className="border p-1 w-full" />
-            <select {...register(`document_definitions.${idx}.allowed_formats` as const)} className="border p-1 w-full">
+            <input {...register(`documents.${idx}.name` as const)} placeholder="Name" className="border p-1 w-full" />
+            <input {...register(`documents.${idx}.description` as const)} placeholder="Description" className="border p-1 w-full" />
+            <select {...register(`documents.${idx}.allowed_formats` as const)} className="border p-1 w-full">
               <option value="pdf">PDF</option>
               <option value="image">Image</option>
               <option value="text">Text</option>

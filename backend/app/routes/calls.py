@@ -41,7 +41,7 @@ def create_new_call(
     return call
 
 
-@router.post("/admin/calls/with-defs", response_model=CallOut)
+@router.post("/with-defs", response_model=CallOut)
 def create_call_with_defs(
     call_in: CallWithDefs,
     db: Session = Depends(get_db),
