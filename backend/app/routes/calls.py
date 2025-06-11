@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from ..database import SessionLocal, Base, engine
+from app.dependencies import get_db
 from ..dependencies import get_current_admin
 from ..models.user import User
 
@@ -10,14 +10,6 @@ from ..schemas.call import CallCreate, CallOut
 from ..crud.call import create_call, get_call
 
 router = APIRouter(prefix="/calls", tags=["calls"])
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 @router.post("/", response_model=CallOut)

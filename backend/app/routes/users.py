@@ -4,25 +4,17 @@ from jose import jwt
 from passlib.context import CryptContext
 
 
-from ..database import SessionLocal
+from app.dependencies import get_db
+from ..dependencies import get_current_user
 from ..schemas.user import UserCreate, UserOut, UserLogin
 from ..crud.user import get_user_by_email, create_user
 from ..models.user import User
-from ..dependencies import get_current_user
 from ..config import settings
 
 router = APIRouter(prefix="/users", tags=["users"])
 auth_router = APIRouter()
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 def create_access_token(data: dict) -> str:
     return jwt.encode(data, settings.jwt_secret, algorithm="HS256")
