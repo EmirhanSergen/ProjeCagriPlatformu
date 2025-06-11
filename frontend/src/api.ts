@@ -134,7 +134,7 @@ export async function createCall(data: CallInput): Promise<Call> {
 }
 
 export interface CallWithDefsInput extends CallInput {
-  document_definitions: {
+  documents: {
     name: string
     description?: string | null
     allowed_formats: string
