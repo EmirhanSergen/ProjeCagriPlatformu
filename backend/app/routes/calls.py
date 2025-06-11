@@ -3,6 +3,7 @@ from fastapi.responses import Response as FastAPIResponse
 from fastapi.templating import Jinja2Templates
 import pdfkit
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
 
 from app.dependencies import get_db
 from ..dependencies import get_current_admin
@@ -11,10 +12,19 @@ from ..models.user import User
 from ..models.call import Call
 from ..models.user import User as UserModel
 from ..schemas.call import CallCreate, CallOut, CallUpdate
+from ..schemas.document import DocumentDefinitionCreate
 from ..schemas.application import ApplicationDetail
 from ..crud.call import create_call, get_call, update_call, delete_call
 from ..crud.application import get_applications_by_call
 from ..crud.attachment import get_attachments_by_application
+from ..models.document import DocumentDefinition
+
+
+class CallWithDefs(CallCreate):
+    """Schema for creating a call with document definitions."""
+
+    documents: list[DocumentDefinitionCreate]
+
 
 router = APIRouter(prefix="/calls", tags=["calls"])
 
@@ -28,6 +38,35 @@ def create_new_call(
     current_admin: User = Depends(get_current_admin),
 ):
     call = create_call(db, call_in)
+    return call
+
+
+@router.post("/admin/calls/with-defs", response_model=CallOut)
+def create_call_with_defs(
+    call_in: CallWithDefs,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin),
+):
+    """Create a call along with its document definitions atomically."""
+    with db.begin_nested():
+        call = Call(
+            title=call_in.title,
+            description=call_in.description,
+            is_open=True if call_in.is_open is None else call_in.is_open,
+        )
+        db.add(call)
+        db.flush()
+        for doc_def in call_in.documents:
+            db.add(
+                DocumentDefinition(
+                    call_id=call.id,
+                    name=doc_def.name,
+                    description=doc_def.description,
+                    allowed_formats=doc_def.allowed_formats,
+                )
+            )
+    db.commit()
+    db.refresh(call)
     return call
 
 
