@@ -9,4 +9,5 @@ class DocumentDefinition(Base):
     id = Column(Integer, primary_key=True, index=True)
     call_id = Column(Integer, ForeignKey("calls.id"), nullable=False)
     name = Column(String, nullable=False)
+    description = Column(String)
     allowed_formats = Column(String, nullable=False)

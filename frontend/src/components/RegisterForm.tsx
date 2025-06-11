@@ -12,7 +12,11 @@ const schema = z.object({
   role: z.string().min(1),
 });
 
-function RegisterForm() {
+interface Props {
+  onSuccess?: () => void
+}
+
+function RegisterForm({ onSuccess }: Props) {
   const {
     register,
     handleSubmit,
@@ -21,9 +25,10 @@ function RegisterForm() {
   const { showToast } = useToast();
 
   const onSubmit = async (data: RegisterData) => {
-    await registerUser(data);
-    showToast('Registered successfully', 'success');
-  };
+    await registerUser(data)
+    showToast('Registered successfully', 'success')
+    onSuccess?.()
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

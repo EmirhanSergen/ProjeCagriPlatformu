@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { getToken, logout as apiLogout, storeToken } from '../api';
+import React, { createContext, useContext, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { getToken, logout as apiLogout, storeToken } from '../api'
 import type { Role } from './RoleSlider';
 
 interface AuthContextType {
@@ -12,8 +13,9 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [token, setToken] = useState<string | null>(null);
-  const [role, setRole] = useState<Role | null>(null);
+  const navigate = useNavigate()
+  const [token, setToken] = useState<string | null>(null)
+  const [role, setRole] = useState<Role | null>(null)
 
   useEffect(() => {
     const t = getToken();
@@ -21,6 +23,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (t) setToken(t);
     if (r) setRole(r);
   }, []);
+
+  useEffect(() => {
+    if (token && role) {
+      if (role === 'admin') navigate('/admin/calls', { replace: true })
+      else navigate('/calls', { replace: true })
+    }
+  }, [token, role, navigate])
 
   const login = (tok: string, r: Role) => {
     storeToken(tok);

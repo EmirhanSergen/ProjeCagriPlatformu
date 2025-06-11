@@ -15,7 +15,11 @@ const schema = z.object({
   password: z.string().min(1),
 });
 
-function LoginForm() {
+interface Props {
+  onSuccess?: (role: Role) => void
+}
+
+function LoginForm({ onSuccess }: Props) {
   const {
     register,
     handleSubmit,
@@ -29,6 +33,7 @@ function LoginForm() {
     const res = await apiLogin({ ...data, role })
     login(res.access_token, role)
     showToast('Logged in!', 'success')
+    onSuccess?.(role)
   })
 
   return (
