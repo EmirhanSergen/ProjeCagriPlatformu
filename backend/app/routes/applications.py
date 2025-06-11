@@ -109,6 +109,19 @@ def save_attachment(
     return {"detail": "Attachment saved"}
 
 
+@router.get("/{call_id}", response_model=ApplicationOut)
+def read_application(
+    call_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Return the current user's application for the given call."""
+    application = get_application_by_user_and_call(db, current_user.id, call_id)
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+    return application
+
+
 @router.get("/{call_id}/attachments", response_model=list[AttachmentOut])
 def list_application_attachments(
     call_id: int,
