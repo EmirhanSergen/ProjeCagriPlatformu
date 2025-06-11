@@ -1,10 +1,11 @@
 from sqlalchemy.orm import Session
 
 from ..models.document import DocumentDefinition
+from ..schemas.document import DocumentFormat
 
 
 def create_document_definition(
-    db: Session, call_id: int, name: str, allowed_formats: str, description: str | None = None
+    db: Session, call_id: int, name: str, allowed_formats: DocumentFormat, description: str | None = None
 ) -> DocumentDefinition:
     doc = DocumentDefinition(
         call_id=call_id,
@@ -22,7 +23,7 @@ def update_document_definition(
     db: Session,
     doc: DocumentDefinition,
     name: str | None = None,
-    allowed_formats: str | None = None,
+    allowed_formats: DocumentFormat | None = None,
     description: str | None = None,
 ) -> DocumentDefinition:
     if name is not None:
