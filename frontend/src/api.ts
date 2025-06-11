@@ -59,6 +59,13 @@ export interface ApplicationData {
   content: string;
 }
 
+export interface Application {
+  id: number;
+  user_id: number;
+  call_id: number;
+  content: string;
+}
+
 export async function submitApplication(data: ApplicationData) {
   const res = await fetch(`${API_BASE}/applications/`, {
     method: 'POST',
@@ -67,6 +74,18 @@ export async function submitApplication(data: ApplicationData) {
   });
   if (!res.ok) {
     throw new Error('Failed to submit application');
+  }
+  return res.json();
+}
+
+export async function fetchApplicationByUserAndCall(
+  callId: number,
+): Promise<Application> {
+  const res = await fetch(`${API_BASE}/applications/${callId}`, {
+    headers: { ...authHeaders() },
+  });
+  if (!res.ok) {
+    throw new Error('Failed to fetch application');
   }
   return res.json();
 }

@@ -1,6 +1,10 @@
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { fetchCall, fetchDocumentDefinitions, fetchAttachments } from '../api'
+import {
+  fetchCall,
+  fetchDocumentDefinitions,
+  fetchApplicationByUserAndCall,
+} from '../api'
 import ApplicationDocumentsPage from './ApplicationDocumentsPage'
 import ApplicationPreview from './ApplicationPreview'
 
@@ -20,9 +24,9 @@ export default function CallDetailPage() {
     enabled: !!callId,
   })
 
-  const attachmentsQuery = useQuery({
-    queryKey: ['attachments', id],
-    queryFn: () => fetchAttachments(id),
+  const applicationQuery = useQuery({
+    queryKey: ['application', id],
+    queryFn: () => fetchApplicationByUserAndCall(id),
     enabled: !!callId,
     retry: false,
   })
@@ -31,7 +35,7 @@ export default function CallDetailPage() {
   if (callQuery.isLoading) return <p>Loading...</p>
   if (callQuery.isError) return <p>Failed to load call.</p>
 
-  const hasApplied = !attachmentsQuery.isError
+  const hasApplied = !applicationQuery.isError
 
   return (
     <section className="space-y-4">
