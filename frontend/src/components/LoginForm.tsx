@@ -2,11 +2,12 @@ import { useForm } from 'react-hook-form'
 import { useState } from 'react'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { login, storeToken } from '../api'
+import { login as apiLogin } from '../api'
 import type { LoginData } from '../api'
 import { useToast } from './ToastProvider'
 import RoleSlider from './RoleSlider'
 import type { Role } from './RoleSlider'
+import { useAuth } from './AuthProvider'
 
 
 const schema = z.object({
@@ -22,10 +23,11 @@ function LoginForm() {
   } = useForm<Omit<LoginData, 'role'>>({ resolver: zodResolver(schema) })
   const { showToast } = useToast()
   const [role, setRole] = useState<Role>('applicant')
+  const { login } = useAuth()
 
   const onSubmit = handleSubmit(async (data) => {
-    const res = await login({ ...data, role })
-    storeToken(res.access_token)
+    const res = await apiLogin({ ...data, role })
+    login(res.access_token, role)
     showToast('Logged in!', 'success')
   })
 
