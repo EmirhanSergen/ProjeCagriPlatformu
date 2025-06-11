@@ -15,14 +15,11 @@ The API will be available at `http://localhost:8000`.
 
 ### Authentication
 
-Send a POST request to `/login` with `email` and `password`. After entering
-your credentials, the front‑end will prompt you to choose a role using a
-slider. The selected role is sent along with the login request:
+Send a POST request to `/login` with JSON containing `email` and `password`:
 
 ```json
 {
   "email": "user@example.com",
-  "password": "secret",
-  "role": "applicant"
+  "password": "secret"
 }
 ```

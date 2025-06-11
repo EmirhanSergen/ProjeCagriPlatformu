@@ -9,7 +9,6 @@ export interface RegisterData {
 export interface LoginData {
   email: string;
   password: string;
-  role: string;
 }
 
 export async function registerUser(data: RegisterData) {
