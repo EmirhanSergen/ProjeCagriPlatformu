@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { fetchCalls, Call } from './api';
+import { fetchCalls } from './api';
+import type { Call } from './api';
 import { useToast } from './ToastProvider';
 
 function CallList() {
