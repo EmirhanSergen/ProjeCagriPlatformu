@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import DocumentSlider from '../components/DocumentSlider'
 import UploadPanel from '../components/UploadPanel'
-import { fetchDocumentDefinitions, DocumentDefinition } from '../api'
+import { fetchDocumentDefinitions, type DocumentDefinition } from '../api'
 import { useToast } from '../components/ToastProvider'
 
 export default function ApplicationDocumentsPage() {

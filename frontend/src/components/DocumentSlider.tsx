@@ -1,4 +1,4 @@
-import { DocumentDefinition } from '../api'
+import type { DocumentDefinition } from '../api'
 
 interface Props {
   documents: DocumentDefinition[]
