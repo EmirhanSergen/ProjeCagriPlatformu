@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -97,6 +98,12 @@ export default function CallManagementPage() {
                 <button onClick={() => onDelete(c.id)} className="text-red-600 underline">
                   Delete
                 </button>
+                <Link
+                  to={`/admin/calls/${c.id}/applications`}
+                  className="text-green-600 underline"
+                >
+                  View Applications
+                </Link>
               </td>
             </tr>
           ))}
