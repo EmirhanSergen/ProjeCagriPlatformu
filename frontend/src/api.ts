@@ -88,6 +88,46 @@ export async function fetchCalls(onlyOpen = false): Promise<Call[]> {
   return res.json();
 }
 
+export interface CallInput {
+  title: string;
+  description?: string | null;
+  is_open?: boolean;
+}
+
+export async function createCall(data: CallInput): Promise<Call> {
+  const res = await fetch(`${API_BASE}/calls/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    throw new Error('Failed to create call');
+  }
+  return res.json();
+}
+
+export async function updateCall(id: number, data: CallInput): Promise<Call> {
+  const res = await fetch(`${API_BASE}/calls/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    throw new Error('Failed to update call');
+  }
+  return res.json();
+}
+
+export async function deleteCall(id: number): Promise<void> {
+  const res = await fetch(`${API_BASE}/calls/${id}`, {
+    method: 'DELETE',
+    headers: { ...authHeaders() },
+  });
+  if (!res.ok) {
+    throw new Error('Failed to delete call');
+  }
+}
+
 export async function uploadDocuments(
   callId: number,
   files: File[],

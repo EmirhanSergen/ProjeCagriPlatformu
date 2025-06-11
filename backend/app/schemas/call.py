@@ -7,6 +7,12 @@ class CallCreate(BaseModel):
     is_open: bool | None = True
 
 
+class CallUpdate(BaseModel):
+    title: str | None = None
+    description: str | None = None
+    is_open: bool | None = None
+
+
 class CallOut(BaseModel):
     id: int
     title: str
