@@ -14,16 +14,21 @@ function CallList() {
   }, [showToast]);
 
   return (
-    <div className="space-y-2">
-      <h2 className="text-xl font-bold">Open Calls</h2>
-      <ul className="list-disc list-inside">
-        {calls.map((c) => (
-          <li key={c.id}>
-            <div className="font-semibold">{c.title}</div>
-            {c.description && <p className="text-sm">{c.description}</p>}
-          </li>
-        ))}
-      </ul>
+    <div>
+      {calls.length === 0 ? (
+        <p>No open calls at the moment.</p>
+      ) : (
+        <ul className="grid gap-4">
+          {calls.map((c) => (
+            <li key={c.id} className="border rounded p-4 shadow bg-white">
+              <h3 className="text-lg font-semibold">{c.title}</h3>
+              {c.description && (
+                <p className="text-sm text-gray-700 mt-1">{c.description}</p>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
