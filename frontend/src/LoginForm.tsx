@@ -40,12 +40,40 @@ function LoginForm() {
     <form onSubmit={onSubmitCredentials} className="space-y-2">
       <h2 className="text-xl font-bold">Login</h2>
       <div>
-        <input {...register('email')} placeholder="Email" className="border p-2 w-full" />
+        <label htmlFor="login-email" className="block">
+          Email
+          <input
+            id="login-email"
+            {...register('email')}
+            placeholder="Email"
+            className="border p-2 w-full"
+          />
+        </label>
         {errors.email && <p className="text-red-600">{errors.email.message}</p>}
       </div>
       <div>
-        <input {...register('password')} type="password" placeholder="Password" className="border p-2 w-full" />
+        <label htmlFor="login-password" className="block">
+          Password
+          <input
+            id="login-password"
+            {...register('password')}
+            type="password"
+            placeholder="Password"
+            className="border p-2 w-full"
+          />
+        </label>
         {errors.password && <p className="text-red-600">{errors.password.message}</p>}
+      </div>
+      <div>
+        <label htmlFor="login-role" className="block">
+          Role
+          <select id="login-role" className="border p-2 w-full">
+            <option value="">Select role</option>
+            <option value="applicant">Applicant</option>
+            <option value="reviewer">Reviewer</option>
+            <option value="admin">Admin</option>
+          </select>
+        </label>
       </div>
       <button disabled={isSubmitting} className="bg-green-500 text-white px-4 py-2 rounded">
         Next
