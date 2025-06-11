@@ -8,9 +8,12 @@ import CallsPage from './pages/CallsPage'
 import HomePage from './pages/HomePage'
 import AboutPage from './pages/AboutPage'
 import ApplicationPreview from './pages/ApplicationPreview'
+import CallDetailPage from './pages/CallDetailPage'
 import CallManagementPage from './pages/CallManagementPage'
 import CallApplicationsPage from './pages/CallApplicationsPage'
 import CallDocumentsPage from './pages/CallDocumentsPage'
+import CreateCallPage from './pages/CreateCallPage'
+import EditCallPage from './pages/EditCallPage'
 import ApplicationDocumentsPage from './pages/ApplicationDocumentsPage'
 import { Routes, Route } from 'react-router-dom'
 
@@ -37,10 +40,34 @@ function App() {
                 }
               />
               <Route
+                path="/calls/:callId"
+                element={
+                  <PrivateRoute>
+                    <CallDetailPage />
+                  </PrivateRoute>
+                }
+              />
+              <Route
                 path="/admin/calls"
                 element={
                   <PrivateRoute roles={['admin']}>
                     <CallManagementPage />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/admin/calls/new"
+                element={
+                  <PrivateRoute roles={['admin']}>
+                    <CreateCallPage />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/admin/calls/:callId/edit"
+                element={
+                  <PrivateRoute roles={['admin']}>
+                    <EditCallPage />
                   </PrivateRoute>
                 }
               />

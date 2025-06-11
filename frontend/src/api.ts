@@ -88,6 +88,14 @@ export async function fetchCalls(onlyOpen = false): Promise<Call[]> {
   return res.json();
 }
 
+export async function fetchCall(callId: number): Promise<Call> {
+  const res = await fetch(`${API_BASE}/calls/${callId}`, { headers: { ...authHeaders() } })
+  if (!res.ok) {
+    throw new Error('Failed to fetch call')
+  }
+  return res.json()
+}
+
 export interface CallInput {
   title: string;
   description?: string | null;
@@ -201,10 +209,11 @@ export interface DocumentDefinition {
   id: number
   call_id: number
   name: string
+  description?: string | null
   allowed_formats: string
 }
 
-export async function createDocumentDefinition(callId: number, data: { name: string; allowed_formats: string }): Promise<DocumentDefinition[]> {
+export async function createDocumentDefinition(callId: number, data: { name: string; description?: string | null; allowed_formats: string }): Promise<DocumentDefinition[]> {
   const res = await fetch(`${API_BASE}/admin/calls/${callId}/documents`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...authHeaders() },
@@ -214,6 +223,28 @@ export async function createDocumentDefinition(callId: number, data: { name: str
     throw new Error('Failed to save document definition')
   }
   return res.json()
+}
+
+export async function updateDocumentDefinition(callId: number, docId: number, data: { name: string; description?: string | null; allowed_formats: string }): Promise<DocumentDefinition> {
+  const res = await fetch(`${API_BASE}/admin/calls/${callId}/documents/${docId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) {
+    throw new Error('Failed to update document definition')
+  }
+  return res.json()
+}
+
+export async function deleteDocumentDefinition(callId: number, docId: number): Promise<void> {
+  const res = await fetch(`${API_BASE}/admin/calls/${callId}/documents/${docId}`, {
+    method: 'DELETE',
+    headers: { ...authHeaders() },
+  })
+  if (!res.ok) {
+    throw new Error('Failed to delete document definition')
+  }
 }
 
 export async function fetchDocumentDefinitions(callId: number): Promise<DocumentDefinition[]> {

@@ -1,35 +1,19 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   fetchCalls,
-  createCall,
-  updateCall,
   deleteCall,
   type Call,
-  type CallInput,
 } from '../api'
 import { useToast } from '../components/ToastProvider'
 
-const schema = z.object({
-  title: z.string().min(1),
-  description: z.string().optional(),
-  is_open: z.boolean().optional(),
-})
-
 export default function CallManagementPage() {
   const [calls, setCalls] = useState<Call[]>([])
-  const [editingId, setEditingId] = useState<number | null>(null)
+  const navigate = useNavigate()
+  const [filterText, setFilterText] = useState('')
+  const [sortField, setSortField] = useState<'title' | 'open' | null>(null)
+  const [sortAsc, setSortAsc] = useState(true)
   const { showToast } = useToast()
-
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors, isSubmitting },
-  } = useForm<CallInput>({ resolver: zodResolver(schema) })
 
   const loadCalls = () => {
     fetchCalls()
@@ -41,26 +25,17 @@ export default function CallManagementPage() {
     loadCalls()
   }, [])
 
-  const onSubmit = handleSubmit(async (data) => {
-    try {
-      if (editingId) {
-        await updateCall(editingId, data)
-        showToast('Call updated', 'success')
-      } else {
-        await createCall(data)
-        showToast('Call created', 'success')
-      }
-      setEditingId(null)
-      reset()
-      loadCalls()
-    } catch {
-      showToast('Failed to save call', 'error')
+  const handleSort = (field: 'title' | 'open') => {
+    if (sortField === field) {
+      setSortAsc(!sortAsc)
+    } else {
+      setSortField(field)
+      setSortAsc(true)
     }
-  })
+  }
 
-  const onEdit = (call: Call) => {
-    setEditingId(call.id)
-    reset({ title: call.title, description: call.description, is_open: call.is_open })
+  const onEdit = (id: number) => {
+    navigate(`/admin/calls/${id}/edit`)
   }
 
   const onDelete = async (id: number) => {
@@ -73,20 +48,54 @@ export default function CallManagementPage() {
     }
   }
 
+  const filtered = calls.filter(
+    (c) =>
+      c.title.toLowerCase().includes(filterText.toLowerCase()) ||
+      (c.description || '').toLowerCase().includes(filterText.toLowerCase()),
+  )
+  const sorted = [...filtered]
+  if (sortField === 'title') {
+    sorted.sort((a, b) =>
+      sortAsc ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title),
+    )
+  } else if (sortField === 'open') {
+    sorted.sort((a, b) => {
+      if (a.is_open === b.is_open) return 0
+      const res = a.is_open ? -1 : 1
+      return sortAsc ? res : -res
+    })
+  }
+
   return (
     <section className="space-y-6">
       <h1 className="text-xl font-bold">Call Management</h1>
+      <input
+        value={filterText}
+        onChange={(e) => setFilterText(e.target.value)}
+        placeholder="Filter"
+        className="border p-2 w-full"
+      />
       <table className="min-w-full border">
         <thead>
           <tr className="bg-gray-100">
-            <th className="p-2 text-left">Title</th>
+            <th
+              className="p-2 text-left cursor-pointer"
+              onClick={() => handleSort('title')}
+            >
+              Title
+            </th>
             <th className="p-2 text-left">Description</th>
-            <th className="p-2">Open</th>
+            <th
+              className="p-2 cursor-pointer"
+              onClick={() => handleSort('open')}
+            >
+              Open
+            </th>
             <th className="p-2">Actions</th>
           </tr>
         </thead>
         <tbody>
-          {calls.map((c) => (
+          {sorted.map((c) => (
             <tr key={c.id} className="border-t">
               <td className="p-2">{c.title}</td>
               <td className="p-2">{c.description}</td>
@@ -110,33 +119,9 @@ export default function CallManagementPage() {
         </tbody>
       </table>
 
-      <form onSubmit={onSubmit} className="space-y-4 border p-4 rounded">
-        <h2 className="text-lg font-semibold">
-          {editingId ? 'Edit Call' : 'Create New Call'}
-        </h2>
-        <div>
-          <label className="block">
-            Title
-            <input {...register('title')} className="border p-2 w-full" />
-          </label>
-          {errors.title && <p className="text-red-600">{errors.title.message}</p>}
-        </div>
-        <div>
-          <label className="block">
-            Description
-            <textarea {...register('description')} className="border p-2 w-full" />
-          </label>
-        </div>
-        <div>
-          <label className="inline-flex items-center space-x-2">
-            <input type="checkbox" {...register('is_open')} defaultChecked />
-            <span>Open</span>
-          </label>
-        </div>
-        <button disabled={isSubmitting} className="bg-blue-600 text-white px-4 py-2 rounded">
-          {editingId ? 'Update' : 'Create'}
-        </button>
-      </form>
+      <div>
+        <Link to="/admin/calls/new" className="underline text-blue-600">Create New Call</Link>
+      </div>
     </section>
   )
 }
