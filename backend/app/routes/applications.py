@@ -9,8 +9,12 @@ from ..dependencies import get_current_user
 from ..models.user import User
 from ..schemas.application import ApplicationCreate, ApplicationOut
 from ..schemas.attachment import AttachmentOut
-from ..crud.application import create_application, get_application_by_user_and_call
-from ..crud.attachment import create_attachment
+from ..crud.application import (
+    create_application,
+    get_application_by_user_and_call,
+    confirm_documents,
+)
+from ..crud.attachment import create_attachment, get_attachments_by_application
 
 router = APIRouter(prefix="/applications", tags=["applications"])
 
@@ -53,3 +57,30 @@ def upload_application_files(
         attachment = create_attachment(db, application.id, str(file_location))
         attachments.append(attachment)
     return attachments
+
+
+@router.get("/{call_id}/attachments", response_model=list[AttachmentOut])
+def list_application_files(
+    call_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Return attachment files for the current user's application."""
+    application = get_application_by_user_and_call(db, current_user.id, call_id)
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+    return get_attachments_by_application(db, application.id)
+
+
+@router.post("/{call_id}/confirm")
+def confirm_application_documents(
+    call_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Mark the current user's application documents as confirmed."""
+    application = get_application_by_user_and_call(db, current_user.id, call_id)
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+    confirm_documents(db, application)
+    return {"message": "Documents confirmed"}

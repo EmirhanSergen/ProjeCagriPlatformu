@@ -25,3 +25,12 @@ def get_application_by_user_and_call(
         .filter(Application.user_id == user_id, Application.call_id == call_id)
         .first()
     )
+
+
+def confirm_documents(db: Session, application: Application) -> Application:
+    """Mark documents for an application as confirmed."""
+    application.documents_confirmed = True
+    db.add(application)
+    db.commit()
+    db.refresh(application)
+    return application
