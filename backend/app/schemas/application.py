@@ -2,7 +2,6 @@ from pydantic import BaseModel
 
 
 class ApplicationCreate(BaseModel):
-    user_id: int
     call_id: int
     content: str
 
