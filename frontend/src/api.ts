@@ -87,3 +87,33 @@ export async function fetchCalls(onlyOpen = false): Promise<Call[]> {
   }
   return res.json();
 }
+
+export async function uploadDocuments(
+  files: File[],
+  onProgress?: (percent: number) => void,
+) {
+  return new Promise<void>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `${API_BASE}/documents/upload`);
+    const token = getToken();
+    if (token) {
+      xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+    }
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable && onProgress) {
+        onProgress((e.loaded / e.total) * 100);
+      }
+    };
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve();
+      } else {
+        reject(new Error('Upload failed'));
+      }
+    };
+    xhr.onerror = () => reject(new Error('Upload failed'));
+    const data = new FormData();
+    files.forEach((f) => data.append('files', f));
+    xhr.send(data);
+  });
+}
