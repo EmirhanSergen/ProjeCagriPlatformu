@@ -1,6 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from ..dependencies import get_current_user
+from ..models.user import User
+
 from ..database import SessionLocal, Base, engine
 from ..schemas.application import ApplicationCreate, ApplicationOut
 from ..crud.application import create_application
@@ -19,7 +22,11 @@ def get_db():
 
 
 @router.post("/", response_model=ApplicationOut)
-def submit_application(app_in: ApplicationCreate, db: Session = Depends(get_db)):
+def submit_application(
+    app_in: ApplicationCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     try:
         application = create_application(db, app_in)
     except ValueError as exc:

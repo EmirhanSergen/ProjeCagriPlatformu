@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from ..database import SessionLocal, Base, engine
+from ..dependencies import get_current_admin
 from ..models.user import User
 from ..models.call import Call
 from ..schemas.call import CallCreate, CallOut
@@ -21,10 +22,11 @@ def get_db():
 
 
 @router.post("/", response_model=CallOut)
-def create_new_call(call_in: CallCreate, admin_id: int = Query(...), db: Session = Depends(get_db)):
-    admin = db.query(User).filter(User.id == admin_id).first()
-    if not admin or admin.role != "admin":
-        raise HTTPException(status_code=403, detail="Admin only")
+def create_new_call(
+    call_in: CallCreate,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin),
+):
     call = create_call(db, call_in)
     return call
 
