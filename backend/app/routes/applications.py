@@ -1,13 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from ..database import SessionLocal, Base, engine
+from ..database import SessionLocal
 from ..schemas.application import ApplicationCreate, ApplicationOut
 from ..crud.application import create_application
 
 router = APIRouter(prefix="/applications", tags=["applications"])
-
-Base.metadata.create_all(bind=engine)
 
 
 def get_db():
