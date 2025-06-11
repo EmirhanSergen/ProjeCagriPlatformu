@@ -133,6 +133,26 @@ export async function createCall(data: CallInput): Promise<Call> {
   return res.json();
 }
 
+export interface CallWithDefsInput extends CallInput {
+  document_definitions: {
+    name: string
+    description?: string | null
+    allowed_formats: string
+  }[]
+}
+
+export async function apiCreateCallWithDefs(data: CallWithDefsInput): Promise<Call> {
+  const res = await fetch(`${API_BASE}/calls/with-defs`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) {
+    throw new Error('Failed to create call')
+  }
+  return res.json()
+}
+
 export async function updateCall(id: number, data: CallInput): Promise<Call> {
   const res = await fetch(`${API_BASE}/calls/${id}`, {
     method: 'PUT',
