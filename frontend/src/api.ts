@@ -54,7 +54,6 @@ function authHeaders() {
 }
 
 export interface ApplicationData {
-  user_id: number;
   call_id: number;
   content: string;
 }
