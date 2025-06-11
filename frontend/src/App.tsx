@@ -4,7 +4,7 @@ import RegisterPage from './RegisterPage';
 import LoginPage from './LoginPage';
 import CallsPage from './CallsPage';
 import { Routes, Route } from 'react-router-dom';
-import './App.css';
+
 
 
 function App() {
