@@ -124,12 +124,12 @@ export interface Attachment {
   file_path: string;
 }
 
-export async function fetchApplicationDocuments(callId: number): Promise<Attachment[]> {
+export async function fetchAttachments(callId: number): Promise<Attachment[]> {
   const res = await fetch(`${API_BASE}/applications/${callId}/attachments`, {
     headers: { ...authHeaders() },
   });
   if (!res.ok) {
-    throw new Error('Failed to fetch documents');
+    throw new Error('Failed to fetch attachments');
   }
   return res.json();
 }

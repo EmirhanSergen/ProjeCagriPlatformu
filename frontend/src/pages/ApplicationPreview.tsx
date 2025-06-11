@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
-  fetchApplicationDocuments,
+  fetchAttachments,
   confirmDocuments,
   type Attachment,
 } from '../api';
@@ -14,7 +14,7 @@ export default function ApplicationPreview() {
 
   useEffect(() => {
     if (!callId) return;
-    fetchApplicationDocuments(Number(callId))
+    fetchAttachments(Number(callId))
       .then(setDocs)
       .catch(() => showToast('Failed to load documents', 'error'));
   }, [callId, showToast]);
