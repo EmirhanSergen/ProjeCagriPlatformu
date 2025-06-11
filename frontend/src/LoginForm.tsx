@@ -64,17 +64,6 @@ function LoginForm() {
         </label>
         {errors.password && <p className="text-red-600">{errors.password.message}</p>}
       </div>
-      <div>
-        <label htmlFor="login-role" className="block">
-          Role
-          <select id="login-role" className="border p-2 w-full">
-            <option value="">Select role</option>
-            <option value="applicant">Applicant</option>
-            <option value="reviewer">Reviewer</option>
-            <option value="admin">Admin</option>
-          </select>
-        </label>
-      </div>
       <button disabled={isSubmitting} className="bg-green-500 text-white px-4 py-2 rounded">
         Next
       </button>
