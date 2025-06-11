@@ -28,6 +28,8 @@ Additional endpoints:
 
 - `POST /calls/` &mdash; create a new project call (admin only).
 - `POST /applications/` &mdash; submit an application to a call.
+- `GET /calls/` &mdash; list all calls (optionally filter by open ones).
+- `GET /calls/{id}` &mdash; get details for a specific call.
 
 ```bash
 # Start frontend

@@ -42,3 +42,20 @@ export function storeToken(token: string) {
 export function getToken() {
   return localStorage.getItem('token');
 }
+
+export interface Call {
+  id: number;
+  title: string;
+  description?: string;
+  is_open: boolean;
+}
+
+export async function fetchCalls(onlyOpen = false): Promise<Call[]> {
+  const url = new URL(`${API_BASE}/calls/`);
+  if (onlyOpen) url.searchParams.set('only_open', 'true');
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error('Failed to fetch calls');
+  }
+  return res.json();
+}
