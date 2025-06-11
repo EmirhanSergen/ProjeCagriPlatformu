@@ -1,6 +1,6 @@
 from enum import Enum
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ConfigDict
 
 class UserRole(str, Enum):
     applicant = "applicant"
@@ -22,5 +22,4 @@ class UserOut(BaseModel):
     email: EmailStr
     role: UserRole
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
