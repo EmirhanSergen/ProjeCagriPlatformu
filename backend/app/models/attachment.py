@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
 
 from ..database import Base
 
@@ -9,3 +9,4 @@ class Attachment(Base):
     id = Column(Integer, primary_key=True, index=True)
     application_id = Column(Integer, ForeignKey("applications.id"), nullable=False)
     file_path = Column(String, nullable=False)
+    is_confirmed = Column(Boolean, default=False)
