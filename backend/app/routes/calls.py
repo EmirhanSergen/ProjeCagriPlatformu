@@ -4,13 +4,12 @@ from sqlalchemy.orm import Session
 from ..database import SessionLocal, Base, engine
 from ..dependencies import get_current_admin
 from ..models.user import User
+
 from ..models.call import Call
 from ..schemas.call import CallCreate, CallOut
 from ..crud.call import create_call, get_call
 
 router = APIRouter(prefix="/calls", tags=["calls"])
-
-Base.metadata.create_all(bind=engine)
 
 
 def get_db():

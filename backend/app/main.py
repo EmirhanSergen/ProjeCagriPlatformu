@@ -5,8 +5,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from .routes import users
 from .routes import calls, applications
 from .config import settings
+from .database import Base, engine
 
 app = FastAPI()
+
+
+@app.on_event("startup")
+def on_startup() -> None:
+    if settings.create_tables:
+        Base.metadata.create_all(bind=engine)
 
 app.add_middleware(
     CORSMiddleware,
