@@ -3,7 +3,6 @@ import LoginForm from './LoginForm';
 import CallList from './CallList';
 import Navbar from './Navbar';
 import { ToastProvider } from './ToastProvider';
-import './App.css';
 
 function App() {
   return (
