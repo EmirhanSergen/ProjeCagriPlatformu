@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { createDocumentDefinition, DocumentDefinition } from '../api'
+import { createDocumentDefinition, type DocumentDefinition } from '../api'
 import { useToast } from '../components/ToastProvider'
 
 const schema = z.object({
