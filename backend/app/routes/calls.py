@@ -3,7 +3,6 @@ from fastapi.responses import Response as FastAPIResponse
 from fastapi.templating import Jinja2Templates
 import pdfkit
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
 
 from app.dependencies import get_db
 from ..dependencies import get_current_admin, get_current_admin_or_reviewer
