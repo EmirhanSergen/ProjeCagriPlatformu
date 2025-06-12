@@ -20,100 +20,71 @@ import PasswordResetRequestPage from './pages/PasswordResetRequestPage'
 import PasswordResetConfirmPage from './pages/PasswordResetConfirmPage'
 import { Routes, Route } from 'react-router-dom'
 
-
-
 function App() {
   return (
     <ToastProvider>
       <AuthProvider>
         <div className="flex flex-col min-h-screen">
           <Navbar />
-          <main className="max-w-md mx-auto p-4 space-y-8 flex-grow">
+          {/* Main container widened: use screen-xl max width instead of md */}
+          <main className="w-full max-w-screen-xl mx-auto p-4 space-y-8 flex-grow">
             <Routes>
+              {/* Public routes */}
               <Route path="/" element={<HomePage />} />
               <Route path="/about" element={<AboutPage />} />
-              <Route path="/register" element={<RegisterPage />} />              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/login" element={<LoginPage />} />
               <Route path="/verify/:token" element={<VerifyEmailPage />} />
               <Route path="/password-reset" element={<PasswordResetRequestPage />} />
               <Route path="/password-reset/:token" element={<PasswordResetConfirmPage />} />
+
+              {/* Protected user routes */}
               <Route
                 path="/calls"
-                element={
-                  <PrivateRoute>
-                    <CallsPage />
-                  </PrivateRoute>
-                }
+                element={<PrivateRoute><CallsPage /></PrivateRoute>}
               />
               <Route
                 path="/calls/:callId"
-                element={
-                  <PrivateRoute>
-                    <CallDetailPage />
-                  </PrivateRoute>
-                }
+                element={<PrivateRoute><CallDetailPage /></PrivateRoute>}
               />
+
+              {/* Admin routes */}
               <Route
                 path="/admin/calls"
-                element={
-                  <PrivateRoute roles={['admin']}>
-                    <CallManagementPage />
-                  </PrivateRoute>
-                }
+                element={<PrivateRoute roles={[ 'admin' ]}><CallManagementPage /></PrivateRoute>}
               />
               <Route
                 path="/admin/calls/new"
-                element={
-                  <PrivateRoute roles={['admin']}>
-                    <CreateCallPage />
-                  </PrivateRoute>
-                }
+                element={<PrivateRoute roles={[ 'admin' ]}><CreateCallPage /></PrivateRoute>}
               />
               <Route
                 path="/admin/calls/:callId/edit"
-                element={
-                  <PrivateRoute roles={['admin']}>
-                    <EditCallPage />
-                  </PrivateRoute>
-                }
+                element={<PrivateRoute roles={[ 'admin' ]}><EditCallPage /></PrivateRoute>}
               />
               <Route
                 path="/admin/calls/:callId/applications"
-                element={
-                  <PrivateRoute roles={['admin']}>
-                    <CallApplicationsPage />
-                  </PrivateRoute>
-                }
+                element={<PrivateRoute roles={[ 'admin' ]}><CallApplicationsPage /></PrivateRoute>}
               />
               <Route
                 path="/admin/calls/:callId/documents"
-                element={
-                  <PrivateRoute roles={['admin']}>
-                    <CallDocumentsPage />
-                  </PrivateRoute>
-                }
+                element={<PrivateRoute roles={[ 'admin' ]}><CallDocumentsPage /></PrivateRoute>}
               />
+
+              {/* Application-specific routes */}
               <Route
                 path="/applications/:callId/preview"
-                element={
-                  <PrivateRoute>
-                    <ApplicationPreview />
-                  </PrivateRoute>
-                }
+                element={<PrivateRoute><ApplicationPreview /></PrivateRoute>}
               />
               <Route
                 path="/applications/:callId/documents"
-                element={
-                  <PrivateRoute>
-                    <ApplicationDocumentsPage />
-                  </PrivateRoute>
-                }
+                element={<PrivateRoute><ApplicationDocumentsPage /></PrivateRoute>}
               />
             </Routes>
           </main>
         </div>
       </AuthProvider>
     </ToastProvider>
-  );
+  )
 }
 
-export default App;
+export default App

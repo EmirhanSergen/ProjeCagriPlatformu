@@ -2,27 +2,29 @@ from pydantic import BaseModel, ConfigDict
 from .attachment import AttachmentOut
 
 
+# Schema for creating a new application
 class ApplicationCreate(BaseModel):
-    call_id: int
-    content: str
+    call_id: int   # ID of the call being applied to
+    content: str   # Application content written by the user
 
-
+# Basic schema for returning application info
 class ApplicationOut(BaseModel):
     id: int
     user_id: int
     call_id: int
     content: str
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True) # Enables ORM-to-pydantic conversion
+ 
 
-
+# Detailed schema for one application with user and attachment info
 class ApplicationDetail(BaseModel):
     id: int
     user_id: int
     call_id: int
     content: str
-    documents_confirmed: bool
-    user_email: str
-    attachments: list[AttachmentOut]
+    documents_confirmed: bool   # Whether the user confirmed their documents
+    user_email: str      # Pulled from the User table via JOIN
+    attachments: list[AttachmentOut]  # List of uploaded documents
 
     model_config = ConfigDict(from_attributes=True)

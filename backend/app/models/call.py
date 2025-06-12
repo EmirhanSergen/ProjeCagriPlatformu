@@ -1,7 +1,8 @@
 from datetime import datetime
 from enum import Enum as PyEnum
-from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, Enum, event, CheckConstraint
+from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, Enum, CheckConstraint
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 
 from ..database import Base
 
@@ -23,7 +24,7 @@ class Call(Base):
     )
 
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String(200), nullable=False)  # Added length constraint
+    title = Column(String(200), nullable=False)
     description = Column(Text)
     is_open = Column(Boolean, default=True)
     status = Column(Enum(CallStatus), nullable=False, default=CallStatus.DRAFT)
@@ -33,6 +34,9 @@ class Call(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
     category = Column(String(50), nullable=True)
     max_applications = Column(Integer, nullable=True)
+
+    # Relationship to document definitions (one-to-many)
+    document_definitions = relationship("DocumentDefinition", backref="call", cascade="all, delete-orphan")
 
     @property
     def is_active(self) -> bool:

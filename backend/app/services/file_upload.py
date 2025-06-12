@@ -12,69 +12,61 @@ import hashlib
 logger = logging.getLogger(__name__)
 
 class FileUploadService:
+    # Allowed MIME types per format
     ALLOWED_MIME_TYPES = {
         'pdf': {'application/pdf'},
         'image': {'image/jpeg', 'image/png', 'image/gif'},
         'text': {'text/plain'}
     }
-    MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
-    UPLOAD_DIR = "uploads"
+    MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB limit
+    UPLOAD_DIR = Path("uploads")
 
     def __init__(self):
+        # Initialize mime detector and ensure upload dir exists
         self.mime = magic.Magic(mime=True)
-        os.makedirs(self.UPLOAD_DIR, exist_ok=True)
+        self.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
     def _get_safe_filename(self, original_filename: str) -> str:
-        """Generate a safe filename with timestamp and hash."""
+        """Generate a timestamped, hashed safe filename."""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         name, ext = os.path.splitext(original_filename)
         file_hash = hashlib.sha256(f"{name}{timestamp}".encode()).hexdigest()[:8]
-        safe_name = f"{timestamp}_{file_hash}{ext}"
-        return safe_name
+        return f"{timestamp}_{file_hash}{ext}"
 
     def _validate_file_type(self, file_path: str, allowed_formats: List[str]) -> bool:
-        """Validate file type using magic numbers."""
-        allowed_mime_types: Set[str] = set()
-        for format_type in allowed_formats:
-            allowed_mime_types.update(self.ALLOWED_MIME_TYPES.get(format_type, set()))
-
-        file_mime_type = self.mime.from_file(file_path)
-        return file_mime_type in allowed_mime_types
+        """Validate file mime type against allowed formats."""
+        allowed_mimes: Set[str] = set()
+        for fmt in allowed_formats:
+            allowed_mimes |= self.ALLOWED_MIME_TYPES.get(fmt, set())
+        mime_type = self.mime.from_file(file_path)
+        return mime_type in allowed_mimes
 
     async def save_upload(self, file: UploadFile, allowed_formats: List[str]) -> str:
         """
-        Save an uploaded file with security checks.
-        Returns the relative path to the saved file.
+        Save uploaded file with security checks and return relative path.
         """
-        try:
-            # Check file size
-            file.file.seek(0, 2)
-            size = file.file.tell()
-            file.file.seek(0)
-            if size > self.MAX_FILE_SIZE:
-                raise HTTPException(status_code=400, detail="File too large")
+        # Check file size
+        file.file.seek(0, 2)
+        size = file.file.tell()
+        file.file.seek(0)
+        if size > self.MAX_FILE_SIZE:
+            raise HTTPException(status_code=400, detail="File too large")
 
-            # Create a safe filename and path
-            safe_filename = self._get_safe_filename(file.filename)
-            today = datetime.now().strftime("%Y-%m-%d")
-            relative_dir = os.path.join(self.UPLOAD_DIR, today)
-            os.makedirs(relative_dir, exist_ok=True)
-            file_path = os.path.join(relative_dir, safe_filename)
+        # Prepare safe path
+        safe_name = self._get_safe_filename(file.filename)
+        date_dir = datetime.now().strftime("%Y-%m-%d")
+        dest_dir = self.UPLOAD_DIR / date_dir
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        dest_path = dest_dir / safe_name
 
-            # Save the file
-            async with aiofiles.open(file_path, 'wb') as f:
-                while chunk := await file.read(8192):
-                    await f.write(chunk)
+        # Save to disk
+        async with aiofiles.open(dest_path, 'wb') as out:
+            while chunk := await file.read(8192):
+                await out.write(chunk)
 
-            # Validate file type
-            if not self._validate_file_type(file_path, allowed_formats):
-                os.unlink(file_path)
-                raise HTTPException(status_code=400, detail="Invalid file type")
+        # Validate mime type
+        if not self._validate_file_type(str(dest_path), allowed_formats):
+            os.unlink(dest_path)
+            raise HTTPException(status_code=400, detail="Invalid file type")
 
-            return os.path.join(today, safe_filename)
-
-        except Exception as e:
-            logger.error(f"File upload error: {str(e)}")
-            if 'file_path' in locals() and os.path.exists(file_path):
-                os.unlink(file_path)
-            raise HTTPException(status_code=500, detail="File upload failed")
+        return str(dest_path.relative_to(self.UPLOAD_DIR))

@@ -1,7 +1,7 @@
 {
-  "files": [],
+  "files": [], // No direct files; delegate to referenced configs
   "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
+    { "path": "./tsconfig.app.json" }, // Application (src) TS settings
+    { "path": "./tsconfig.node.json" } // Node/Vite config for tooling
   ]
 }

@@ -1,3 +1,6 @@
+# This file is intentionally left empty to ensure all models are imported
+# and registered with the SQLAlchemy Base.
+
 """Import all ORM models so Alembic can discover them."""
 from ..database import Base
 from .user import User  # noqa: F401

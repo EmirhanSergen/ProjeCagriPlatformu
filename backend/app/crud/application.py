@@ -6,9 +6,12 @@ from ..models.call import Call
 
 
 def create_application(db: Session, call_id: int, content: str, user_id: int) -> Application:
+    # Check if the call exists and is open
     call = db.query(Call).filter(Call.id == call_id).first()
     if not call or not call.is_open:
         raise ValueError("Call not available")
+    
+    # Create and store the application
     application = Application(user_id=user_id, call_id=call_id, content=content)
     db.add(application)
     db.commit()
@@ -39,3 +42,16 @@ def confirm_documents(db: Session, application: Application) -> Application:
 def get_applications_by_call(db: Session, call_id: int) -> list[Application]:
     """Return all applications submitted for the given call."""
     return db.query(Application).filter(Application.call_id == call_id).all()
+
+
+def assign_reviewer(db: Session, application_id: int, reviewer_id: int) -> Application:
+    """Assign a reviewer to an application."""
+    application = db.query(Application).filter(Application.id == application_id).first()
+    if not application:
+        raise ValueError("Application not found")
+    
+    application.reviewer_id = reviewer_id
+    db.add(application)
+    db.commit()
+    db.refresh(application)
+    return application

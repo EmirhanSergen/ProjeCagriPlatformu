@@ -1,110 +1,101 @@
-import { useForm } from 'react-hook-form';
-import { useState } from 'react';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { registerUser } from '../api';
-import type { RegisterData } from '../api';
-import { useToast } from './ToastProvider';
+import { useForm } from 'react-hook-form'
+import { useToast } from './ToastProvider'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { registerUser } from '../api'
+import type { RegisterData } from '../api'
+import { z } from 'zod'
+import { Link } from 'react-router-dom'
 
-
+// Validation schema
 const schema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
-  role: z.string().min(1),
-});
+  email:    z.string().email('Invalid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  role:     z.enum(['applicant', 'reviewer', 'admin']),
+})
 
-interface Props {
-  onSuccess?: () => void
-}
-
-function RegisterForm({ onSuccess }: Props) {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<RegisterData>({ resolver: zodResolver(schema) });
-  const { showToast } = useToast();
-  const [isRegistered, setIsRegistered] = useState(false);
+interface Props { onSuccess?: () => void }
+export default function RegisterForm({ onSuccess }: Props) {
+  const { register, handleSubmit, formState: { errors, isSubmitting } } =
+    useForm<RegisterData>({ resolver: zodResolver(schema) })
+  const { showToast } = useToast()
 
   const onSubmit = async (data: RegisterData) => {
     try {
-      await registerUser(data);
-      setIsRegistered(true);
-      showToast('Registration successful!', 'success');
-    } catch (error) {
-      showToast('Registration failed', 'error');
+      await registerUser(data)
+      showToast('Registration successful! Check your email to verify.', 'success')
+      onSuccess?.()
+    } catch {
+      showToast('Registration failed. Please try again.', 'error')
     }
-  }
-  if (isRegistered) {
-    return (
-      <div className="text-center space-y-4">
-        <h2 className="text-xl font-bold text-green-600">Registration Successful!</h2>
-        <p>Please check your email to verify your account.</p>
-        <p>After verification, you can <a href="/login" className="text-blue-500 hover:underline">log in</a>.</p>
-      </div>
-    );
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <h2 className="text-xl font-bold">Register</h2>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      {/* Email */}
       <div>
-        <label htmlFor="register-email" className="block">
+        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
           Email
-          <input
-            id="register-email"
-            {...register('email')}
-            type="email"
-            placeholder="Email"
-            className="border p-2 w-full rounded"
-          />
         </label>
-        {errors.email && <p className="text-red-600 text-sm">{errors.email.message}</p>}
+        <input
+          id="email"
+          type="email"
+          {...register('email')}
+          disabled={isSubmitting}
+          placeholder="you@example.com"
+          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm px-4 py-3 h-12 focus:ring-blue-500 focus:border-blue-500"
+        />
+        {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
       </div>
+
+      {/* Password */}
       <div>
-        <label htmlFor="register-password" className="block">
+        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
           Password
-          <input
-            id="register-password"
-            {...register('password')}
-            type="password"
-            placeholder="Password (minimum 6 characters)"
-            className="border p-2 w-full rounded"
-          />
         </label>
-        {errors.password && <p className="text-red-600 text-sm">{errors.password.message}</p>}
+        <input
+          id="password"
+          type="password"
+          {...register('password')}
+          disabled={isSubmitting}
+          placeholder="Minimum 6 characters"
+          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm px-4 py-3 h-12 focus:ring-blue-500 focus:border-blue-500"
+        />
+        {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>}
       </div>
+
+      {/* Role */}
       <div>
-        <label htmlFor="register-role" className="block">
+        <label htmlFor="role" className="block text-sm font-medium text-gray-700">
           Role
-          <select
-            id="register-role"
-            {...register('role')}
-            className="border p-2 w-full rounded"
-          >
-            <option value="">Select role</option>
-            <option value="applicant">Applicant</option>
-            <option value="reviewer">Reviewer</option>
-            <option value="admin">Admin</option>
-          </select>
         </label>
-        {errors.role && <p className="text-red-600 text-sm">{errors.role.message}</p>}
+        <select
+          id="role"
+          {...register('role')}
+          disabled={isSubmitting}
+          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm px-4 py-3 h-12 focus:ring-blue-500 focus:border-blue-500"
+        >
+          <option value="">Select role</option>
+          <option value="applicant">Applicant</option>
+          <option value="reviewer">Reviewer</option>
+          <option value="admin">Administrator</option>
+        </select>
+        {errors.role && <p className="mt-1 text-sm text-red-600">{errors.role.message}</p>}
       </div>
+
+      {/* Submit */}
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50"
+        className="w-full py-3 px-4 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 disabled:opacity-50"
       >
-        {isSubmitting ? 'Registering...' : 'Register'}
+        {isSubmitting ? 'Registering…' : 'Register'}
       </button>
-      <p className="text-center text-gray-600">
+
+      {/* Login Link */}
+      <p className="text-center text-sm text-gray-600">
         Already have an account?{' '}
-        <a href="/login" className="text-blue-500 hover:underline">
-          Log in
-        </a>
+        <Link to="/login" className="text-blue-600 hover:underline">Log in</Link>
       </p>
     </form>
-  );
+  )
 }
-
-export default RegisterForm;

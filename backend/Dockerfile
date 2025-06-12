@@ -9,6 +9,7 @@ RUN apt-get update \
         gcc \
         python3-dev \
         libpq-dev \
+        dos2unix \
     && pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt \
     && apt-get purge -y gcc python3-dev \
@@ -20,6 +21,6 @@ COPY alembic.ini ./
 COPY migrations ./migrations
 
 COPY app ./app
-COPY start.sh ./
-RUN chmod +x start.sh
-CMD ["./start.sh"]
+COPY ./start.sh /app/start.sh
+RUN chmod +x /app/start.sh && dos2unix /app/start.sh
+CMD ["bash", "/app/start.sh"]

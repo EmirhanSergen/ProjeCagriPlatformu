@@ -1,19 +1,23 @@
 {
   "compilerOptions": {
+    // Where to store incremental build info for faster rebuilds
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
+    // Target modern Node version for Vite config (uses ES2022 features)
     "target": "ES2022",
+    // Include only ES2023 built-ins
     "lib": ["ES2023"],
+    // Use ESNext modules for Vite to handle imports
     "module": "ESNext",
     "skipLibCheck": true,
 
-    /* Bundler mode */
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
-    "moduleDetection": "force",
-    "noEmit": true,
+    /* Bundler mode settings for Vite: */
+    "moduleResolution": "bundler",         // Resolve modules like a bundler
+    "allowImportingTsExtensions": true,     // Permit .ts extensions in imports
+    "verbatimModuleSyntax": true,           // Preserve import/export syntax
+    "moduleDetection": "force",           // Treat files as modules even without ES imports
+    "noEmit": true,                         // Do not output compiled files
 
-    /* Linting */
+    /* Strictness & linting: */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
@@ -21,5 +25,6 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
+  // Only include Vite config itself in this tsconfig
   "include": ["vite.config.ts"]
 }
