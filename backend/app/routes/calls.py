@@ -63,7 +63,7 @@ def create_call_with_defs(
                         call_id=call.id,
                         name=doc_def.name,
                         description=doc_def.description,
-                        allowed_formats=doc_def.allowed_formats,
+                        allowed_formats=doc_def.allowed_formats.value,
                     )
                 )
         db.commit()
