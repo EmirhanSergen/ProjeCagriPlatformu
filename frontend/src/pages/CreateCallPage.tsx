@@ -16,6 +16,7 @@ const schema = z.object({
   description: z.string().optional(),
   is_open: z.boolean().optional(),
   documents: z.array(docSchema),
+})
 
 type FormValues = z.infer<typeof schema>
 
@@ -88,8 +89,8 @@ export default function CreateCallPage() {
         <button type="button" onClick={() => append({ name: '', description: '', allowed_formats: 'pdf' })} className="bg-gray-200 px-2 py-1 rounded">
           Add Item
         </button>
-        {errors.document_definitions && (
-          <p className="text-red-600">{errors.document_definitions.message}</p>
+        {errors.documents && (
+          <p className="text-red-600">{errors.documents.message}</p>
         )}
       </div>
       <button disabled={isSubmitting} className="bg-blue-600 text-white px-4 py-2 rounded">
