@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     jwt_secret: SecretStr
     jwt_algorithm: str = "HS256"
     jwt_expiration: int = 30  # minutes
+    access_token_expire_minutes: int = 30  # alias for jwt_expiration
     allowed_origins: str = "*"
     allowed_hosts: List[str] = ["localhost", "127.0.0.1"]
     create_tables: bool = False

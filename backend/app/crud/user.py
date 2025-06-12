@@ -17,6 +17,9 @@ def create_user(db: Session, user_in: UserCreate) -> User:
     hashed_password = pwd_context.hash(user_in.password)
     verification_token = secrets.token_urlsafe(32)
     
+    # Auto-verify users in development
+    is_verified = settings.environment == "development"
+    
     user = User(
         email=user_in.email,
         hashed_password=hashed_password,
@@ -24,8 +27,8 @@ def create_user(db: Session, user_in: UserCreate) -> User:
         first_name=user_in.first_name,
         last_name=user_in.last_name,
         organization=user_in.organization,
-        verification_token=verification_token,
-        is_verified=False
+        verification_token=None if is_verified else verification_token,
+        is_verified=is_verified
     )
     db.add(user)
     db.commit()
