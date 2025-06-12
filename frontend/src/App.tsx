@@ -27,7 +27,7 @@ function App() {
         <div className="flex flex-col min-h-screen">
           <Navbar />
           {/* Main container widened: use screen-xl max width instead of md */}
-          <main className="w-full max-w-screen-xl mx-auto p-4 space-y-8 flex-grow">
+          <main className="w-full max-w-screen-2xl mx-auto p-4 space-y-8 flex-grow">
             <Routes>
               {/* Public routes */}
               <Route path="/" element={<HomePage />} />

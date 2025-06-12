@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
 from ..models.call import Call as CallModel, CallStatus
-from ..schemas.call import CallCreate
+from ..schemas.call import CallCreate, CallUpdate
 
 def create_call(db: Session, call_in: CallCreate) -> CallModel:
     """
@@ -27,17 +27,15 @@ def get_call(db: Session, call_id: int) -> CallModel | None:
     """Fetch a call by its ID."""
     return db.query(CallModel).filter(CallModel.id == call_id).first()
 
-def update_call(db: Session, call_id: int, call_in: CallCreate) -> CallModel | None:
+def update_call(db: Session, call_id: int, call_in: CallUpdate) -> CallModel | None:
     """
     Update mutable fields of an existing call.
-    Excludes any incoming `status` so we never write an invalid enum.
+    Only updates fields that are provided in the update schema.
     """
     db_call = db.query(CallModel).filter(CallModel.id == call_id).first()
     if not db_call:
-        return None
-
-    # Drop any 'status' key from the incoming payload
-    data = call_in.model_dump(exclude={'status'})
+        return None    # Update fields that were included in the update request
+    data = call_in.model_dump(exclude_unset=True)
     for field, value in data.items():
         setattr(db_call, field, value)
 

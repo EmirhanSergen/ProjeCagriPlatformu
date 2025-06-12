@@ -52,12 +52,11 @@ def update_existing_call(
     call_in: CallUpdate,
     db: Session = Depends(get_db),
     current_admin = Depends(get_current_admin),
-):
-    # Update only provided fields on an existing call
+):    # Update only provided fields on an existing call
     call = get_call(db, call_id)
     if not call:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Call not found")
-    updated = update_call(db, call, call_in)
+    updated = update_call(db, call_id, call_in)
     return updated
 
 @router.delete("/{call_id}", status_code=status.HTTP_204_NO_CONTENT)

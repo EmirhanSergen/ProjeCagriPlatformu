@@ -133,9 +133,14 @@ export async function fetchCall(callId: number): Promise<Call> {
 }
 
 export interface CallInput {
-  title: string;
+  title?: string;
   description?: string | null;
   is_open?: boolean;
+  start_date?: string | null;
+  end_date?: string | null;
+  category?: string | null;
+  max_applications?: number | null;
+  status?: 'DRAFT' | 'PUBLISHED' | 'CLOSED' | 'ARCHIVED';
 }
 
 export async function createCall(data: CallInput): Promise<Call> {
@@ -304,7 +309,7 @@ export async function deleteDocumentDefinition(callId: number, docId: number): P
 }
 
 export async function fetchDocumentDefinitions(callId: number): Promise<DocumentDefinition[]> {
-  const res = await fetch(`${API_BASE}/applications/${callId}/documents`, { headers: { ...authHeaders() } })
+  const res = await fetch(`${API_BASE}/admin/calls/${callId}/documents/`, { headers: { ...authHeaders() } })
   if (!res.ok) {
     throw new Error('Failed to load document definitions')
   }
