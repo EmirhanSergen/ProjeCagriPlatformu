@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useContext, useState } from 'react'
 import { getToken, logout as apiLogout, storeToken } from '../api'
 import type { Role } from './RoleSlider';
 
@@ -12,17 +12,11 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [token, setToken] = useState<string | null>(null)
-  const [role, setRole] = useState<Role | null>(null)
-
-  // Restore auth state from localStorage. Navigation after login
-  // is handled in LoginPage via the onSuccess callback.
-  useEffect(() => {
-    const t = getToken();
-    const r = localStorage.getItem('role') as Role | null;
-    if (t) setToken(t);
-    if (r) setRole(r);
-  }, []);
+  const [token, setToken] = useState<string | null>(() => getToken())
+  const [role, setRole] = useState<Role | null>(() => {
+    const r = localStorage.getItem('role')
+    return r as Role | null
+  })
 
   const login = (tok: string, r: Role) => {
     storeToken(tok);
