@@ -15,6 +15,11 @@ docker-compose up --build
 
 The API will be available at `http://localhost:8000`.
 
+### Requirements
+
+The PDF export feature relies on [wkhtmltopdf](https://wkhtmltopdf.org/). The Docker image installs it automatically, but if you run the app locally you must install `wkhtmltopdf` yourself (e.g. `sudo apt-get install wkhtmltopdf`).
+
+
 ### Database migrations
 
 The project uses Alembic for managing schema migrations. Set your
