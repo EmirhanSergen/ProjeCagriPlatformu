@@ -1,4 +1,3 @@
-// src/pages/CallManagementPage.tsx
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Search as SearchIcon, Pencil, Trash2, Eye } from '../components/icons'
@@ -6,6 +5,7 @@ import { ArrowDown, ArrowUp } from 'lucide-react'
 import { Input } from '../components/ui/Input'
 import { Button } from '../components/ui/Button'
 import { Card, CardHeader, CardContent } from '../components/ui/Card'
+import ConfirmModal from '../components/ui/ConfirmModal'
 import {
   Table,
   TableHeader,
@@ -34,6 +34,8 @@ export default function CallManagementPage() {
   const [statusFilter, setStatusFilter] = useState('All')
   const [sortField, setSortField] = useState<keyof ExtendedCall | null>('updated_at')
   const [sortAsc, setSortAsc] = useState(true)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null)
   const { showToast } = useToast()
   const navigate = useNavigate()
 
@@ -74,18 +76,26 @@ export default function CallManagementPage() {
   }
 
   const onEdit = (id: number) => navigate(`/admin/calls/${id}/edit`)
-  const onDelete = async (id: number) => {
-    setDeletingId(id)
-    try {
-      await deleteCall(id)
-      showToast('Call deleted', 'success')
-      setCalls(prev => prev.filter(c => c.id !== id))
-    } catch {
-      showToast('Failed to delete call', 'error')
-    } finally {
-      setDeletingId(null)
-    }
+  const onDeleteClick = (id: number) => {
+  setPendingDeleteId(id)
+  setConfirmOpen(true)
+}
+
+const onConfirmDelete = async () => {
+  if (pendingDeleteId === null) return
+  setDeletingId(pendingDeleteId)
+  setConfirmOpen(false)
+  try {
+    await deleteCall(pendingDeleteId)
+    showToast('Call deleted', 'success')
+    setCalls(prev => prev.filter(c => c.id !== pendingDeleteId))
+  } catch {
+    showToast('Failed to delete call', 'error')
+  } finally {
+    setDeletingId(null)
+    setPendingDeleteId(null)
   }
+}
 
   const sortableFields: (keyof ExtendedCall)[] = [
     'title',
@@ -109,7 +119,16 @@ export default function CallManagementPage() {
   return (
     <section className="space-y-6">
       <h1 className="text-xl font-bold">Call Management</h1>
-
+      <ConfirmModal
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={onConfirmDelete}
+        title="Are you sure?"
+        description="This action will permanently delete the call."
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        danger
+      />
       <Card>
         <CardHeader className="flex justify-between items-center">
           <h2 className="font-semibold text-lg">Calls</h2>
@@ -199,7 +218,7 @@ export default function CallManagementPage() {
                     className={`${idx % 2 ? 'bg-gray-50' : ''} hover:bg-gray-50`}
                   >
                     <TableCell>{c.title}</TableCell>
-                    <TableCell className="hidden md:table-cell">{c.description}</TableCell>
+                    <TableCell className="hidden md:table-cell max-w-[200px] truncate whitespace-nowrap overflow-hidden">{c.description}</TableCell>
                     <TableCell className="text-center">{c.start_date ? format(new Date(c.start_date),'yyyy-MM-dd') : '-'}</TableCell>
                     <TableCell className="text-center">{c.end_date ? format(new Date(c.end_date),'yyyy-MM-dd') : '-'}</TableCell>
                     <TableCell className="text-center">{c.category || '-'}</TableCell>
@@ -217,11 +236,12 @@ export default function CallManagementPage() {
                         </Button>
                         <Button
                           variant="destructive"
-                          onClick={()=>onDelete(c.id)}
-                          disabled={deletingId===c.id}
+                          onClick={() => onDeleteClick(c.id)}
+                          disabled={deletingId === c.id}
                           className="flex items-center text-sm px-2 py-1 disabled:opacity-50"
                         >
-                          <Trash2 className="h-4 w-4 mr-1" />{deletingId===c.id?'Deleting…':'Delete'}
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          {deletingId === c.id ? 'Deleting…' : 'Delete'}
                         </Button>
                         <Link
                           to={`/admin/calls/${c.id}/applications`}
@@ -239,9 +259,14 @@ export default function CallManagementPage() {
         </CardContent>
       </Card>
 
-      <Link to="/admin/calls/new" className="underline text-blue-600">
-        Create New Call
-      </Link>
+      <div className="flex justify-end">
+        <Link
+          to="/admin/calls/new"
+          className="inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+        >
+          + Create New Call
+        </Link>
+      </div>
     </section>
   )
 }

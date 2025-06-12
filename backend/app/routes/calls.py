@@ -65,11 +65,10 @@ def delete_existing_call(
     db: Session = Depends(get_db),
     current_admin = Depends(get_current_admin),
 ):
-    # Delete a call, after verifying it exists
-    call = get_call(db, call_id)
-    if not call:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Call not found")
-    delete_call(db, call)
+    
+    deleted = delete_call(db, call_id)          # sadece ID gönderiyoruz
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Call not found")
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 @router.get("/{call_id}/applications", response_model=list[ApplicationDetail])

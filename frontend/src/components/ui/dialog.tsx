@@ -3,18 +3,21 @@ import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { X } from "lucide-react"
 import { cn } from "../../lib/utils"
 
-
+// Updated type to accept children prop
 type DialogPortalPropsWithClass = DialogPrimitive.DialogPortalProps & {
   className?: string
+  children: React.ReactNode
 }
 
 const Dialog = DialogPrimitive.Root
 
 const DialogTrigger = DialogPrimitive.Trigger
 
-const DialogPortal = ({ className, ...props }: DialogPortalPropsWithClass) => (
+const DialogPortal = ({ className, children, ...props }: DialogPortalPropsWithClass) => (
   <DialogPrimitive.Portal {...props}>
-    <div className={cn("fixed inset-0 z-50 flex items-center justify-center", className)} />
+    <div className={cn("fixed inset-0 z-50 flex items-center justify-center", className)}>
+      {children}
+    </div>
   </DialogPrimitive.Portal>
 )
 DialogPortal.displayName = DialogPrimitive.Portal.displayName
