@@ -30,10 +30,15 @@ function LoginForm({ onSuccess }: Props) {
   const { login } = useAuth()
 
   const onSubmit = handleSubmit(async (data) => {
-    const res = await apiLogin({ ...data, role })
-    login(res.access_token, role)
-    showToast('Logged in!', 'success')
-    onSuccess?.(role)
+    try {
+      const res = await apiLogin({ ...data, role });
+      login(res.access_token, role);
+      showToast('Logged in!', 'success');
+      onSuccess?.(role);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Invalid credentials';
+      showToast(errorMessage, 'error');
+    }
   })
 
   return (
