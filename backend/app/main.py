@@ -21,17 +21,20 @@ app = FastAPI(
     title="Project Call Platform",
     description="API for managing project calls and applications",
     version="1.0.0",
-    docs_url="/api/docs" if settings.environment != "production" else None,
-    redoc_url="/api/redoc" if settings.environment != "production" else None
+    docs_url="/docs" if settings.environment != "production" else None,
+    redoc_url="/redoc" if settings.environment != "production" else None
 )
 
 @app.on_event("startup")
 async def on_startup() -> None:
-    if settings.create_tables:
-        Base.metadata.create_all(bind=engine)
-    # Start rate limiter cleanup task
-    rate_limiter = RateLimiter(requests_per_minute=60)
-    await rate_limiter.cleanup()
+    try:
+        if settings.create_tables:
+            Base.metadata.create_all(bind=engine)
+        # Initialize rate limiter
+        app.state.rate_limiter = RateLimiter(requests_per_minute=60)
+    except Exception as e:
+        logger.error(f"Startup error: {e}", exc_info=True)
+        raise
 
 # Error handling
 @app.exception_handler(Exception)
@@ -48,8 +51,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[origin.strip() for origin in settings.allowed_origins.split(',')],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
-    allow_headers=["Authorization", "Content-Type"],
+    allow_methods=["*"],
+    allow_headers=["*"],
     expose_headers=["Content-Disposition"],
     max_age=3600
 )

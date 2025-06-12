@@ -64,13 +64,19 @@ function LoginForm({ onSuccess }: Props) {
           />
         </label>
         {errors.password && <p className="text-red-600">{errors.password.message}</p>}
+      </div>      <div className="space-y-4">
+        <button
+          disabled={isSubmitting}
+          className="w-full bg-green-500 text-white px-4 py-2 rounded"
+        >
+          {isSubmitting ? 'Logging in...' : 'Login'}
+        </button>
+        <div className="text-center">
+          <a href="/password-reset" className="text-blue-500 hover:underline">
+            Forgot your password?
+          </a>
+        </div>
       </div>
-      <button
-        disabled={isSubmitting}
-        className="bg-green-500 text-white px-4 py-2 rounded mt-4"
-      >
-        Login
-      </button>
     </form>
   )
 }

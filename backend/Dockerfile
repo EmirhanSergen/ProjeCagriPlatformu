@@ -1,11 +1,19 @@
 FROM python:3.11-slim
 WORKDIR /app
 COPY requirements.txt ./
-# Install wkhtmltopdf for PDF export functionality
+# Install system dependencies and Python packages
 RUN apt-get update \
-    && apt-get install -y wkhtmltopdf \
-    && rm -rf /var/lib/apt/lists/* \
-    && pip install --no-cache-dir -r requirements.txt
+    && apt-get install -y --no-install-recommends \
+        wkhtmltopdf \
+        libmagic1 \
+        gcc \
+        python3-dev \
+        libpq-dev \
+    && pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt \
+    && apt-get purge -y gcc python3-dev \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
 
 # Include migrations so Alembic can run inside the container
 COPY alembic.ini ./

@@ -15,6 +15,9 @@ import CallDocumentsPage from './pages/CallDocumentsPage'
 import CreateCallPage from './pages/CreateCallPage'
 import EditCallPage from './pages/EditCallPage'
 import ApplicationDocumentsPage from './pages/ApplicationDocumentsPage'
+import VerifyEmailPage from './pages/VerifyEmailPage'
+import PasswordResetRequestPage from './pages/PasswordResetRequestPage'
+import PasswordResetConfirmPage from './pages/PasswordResetConfirmPage'
 import { Routes, Route } from 'react-router-dom'
 
 
@@ -29,8 +32,10 @@ function App() {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/about" element={<AboutPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />              <Route path="/login" element={<LoginPage />} />
+              <Route path="/verify/:token" element={<VerifyEmailPage />} />
+              <Route path="/password-reset" element={<PasswordResetRequestPage />} />
+              <Route path="/password-reset/:token" element={<PasswordResetConfirmPage />} />
               <Route
                 path="/calls"
                 element={

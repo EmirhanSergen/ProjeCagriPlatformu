@@ -4,6 +4,9 @@ export interface RegisterData {
   email: string;
   password: string;
   role: string;
+  firstName?: string;
+  lastName?: string;
+  organization?: string;
 }
 
 export interface LoginData {
@@ -48,7 +51,7 @@ export function logout() {
   localStorage.removeItem('token');
 }
 
-function authHeaders() {
+function authHeaders(): Record<string, string> {
   const token = getToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
@@ -301,6 +304,49 @@ export async function fetchApplications(
   });
   if (!res.ok) {
     throw new Error('Failed to fetch applications');
+  }
+  return res.json();
+}
+
+export async function verifyEmail(token: string) {
+  const res = await fetch(`${API_BASE}/users/verify/${token}`, {
+    method: 'POST',
+  });
+  if (!res.ok) {
+    throw new Error('Failed to verify email');
+  }
+  return res.json();
+}
+
+export interface PasswordResetRequest {
+  email: string;
+}
+
+export interface PasswordResetConfirm {
+  token: string;
+  newPassword: string;
+}
+
+export async function requestPasswordReset(email: string) {
+  const res = await fetch(`${API_BASE}/users/password-reset`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+  if (!res.ok) {
+    throw new Error('Failed to request password reset');
+  }
+  return res.json();
+}
+
+export async function confirmPasswordReset(token: string, newPassword: string) {
+  const res = await fetch(`${API_BASE}/users/password-reset/confirm`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, new_password: newPassword }),
+  });
+  if (!res.ok) {
+    throw new Error('Failed to reset password');
   }
   return res.json();
 }
