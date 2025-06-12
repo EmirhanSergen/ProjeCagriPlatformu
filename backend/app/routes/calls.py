@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
 from app.dependencies import get_db
-from ..dependencies import get_current_admin
+from ..dependencies import get_current_admin, get_current_admin_or_reviewer
 from ..models.user import User
 
 from ..models.call import Call
@@ -91,7 +91,7 @@ def read_call(call_id: int, db: Session = Depends(get_db)):
 def list_call_applications(
     call_id: int,
     db: Session = Depends(get_db),
-    current_admin: User = Depends(get_current_admin),
+    current_user: User = Depends(get_current_admin_or_reviewer),
 ):
     call = get_call(db, call_id)
     if not call:
