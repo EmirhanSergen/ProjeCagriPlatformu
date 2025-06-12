@@ -26,8 +26,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
-    apiLogout();
-    localStorage.removeItem('role');
+    apiLogout(); // This internally calls clearAllTokens
     setToken(null);
     setRole(null);
   };

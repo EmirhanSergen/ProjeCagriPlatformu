@@ -16,11 +16,11 @@ depends_on = None
 
 def upgrade():
     # Create an enum type for call status
-    status_enum = postgresql.ENUM('draft', 'published', 'closed', 'archived', name='call_status')
+    status_enum = postgresql.ENUM('DRAFT', 'PUBLISHED', 'CLOSED', 'ARCHIVED', name='call_status')
     status_enum.create(op.get_bind())
 
     # Add new columns
-    op.add_column('calls', sa.Column('status', sa.Enum('draft', 'published', 'closed', 'archived', name='call_status'), nullable=False, server_default='draft'))
+    op.add_column('calls', sa.Column('status', sa.Enum('DRAFT', 'PUBLISHED', 'CLOSED', 'ARCHIVED', name='call_status'), nullable=False, server_default='DRAFT'))
     op.add_column('calls', sa.Column('start_date', sa.DateTime(timezone=True), nullable=True))
     op.add_column('calls', sa.Column('end_date', sa.DateTime(timezone=True), nullable=True))
     op.add_column('calls', sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('NOW()'), nullable=False))

@@ -8,10 +8,10 @@ from ..database import Base
 
 
 class CallStatus(str, PyEnum):
-    DRAFT = 'draft'
-    PUBLISHED = 'published'
-    CLOSED = 'closed'
-    ARCHIVED = 'archived'
+    DRAFT = 'DRAFT'
+    PUBLISHED = 'PUBLISHED'
+    CLOSED = 'CLOSED'
+    ARCHIVED = 'ARCHIVED'
 
 
 class Call(Base):

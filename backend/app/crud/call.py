@@ -1,4 +1,3 @@
-
 from sqlalchemy.orm import Session
 
 from ..models.call import Call as CallModel, CallStatus
@@ -7,13 +6,13 @@ from ..schemas.call import CallCreate
 def create_call(db: Session, call_in: CallCreate) -> CallModel:
     """
     Create a new Call using only supported fields and a valid enum status.
-    Always starts in OPEN status to avoid invalid INSERT values.
+    Always starts in DRAFT status to avoid invalid INSERT values.
     """
     db_call = CallModel(
         title=call_in.title,
         description=call_in.description,
         is_open=call_in.is_open,
-        status=CallStatus.OPEN,               # force a valid enum member
+        status=CallStatus.DRAFT,               # Start in draft status
         start_date=call_in.start_date,
         end_date=call_in.end_date,
         category=call_in.category,

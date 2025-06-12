@@ -50,7 +50,6 @@ export default function LoginForm({ onSuccess }: Props) {
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
-      <h2 className="text-2xl font-bold text-center">Welcome Back</h2>
       <p className="text-center text-lg">Login</p>
 
       <RoleSlider value={role} onChange={setRole} />

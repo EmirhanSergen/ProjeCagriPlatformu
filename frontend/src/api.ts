@@ -1,5 +1,26 @@
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
 
+// Token management functions
+export function storeToken(token: string) {
+  localStorage.setItem('token', token);
+}
+
+export function getToken() {
+  return localStorage.getItem('token');
+}
+
+export function clearAllTokens() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('role');
+}
+
+// Auth header helper
+function authHeaders(): Record<string,string> {
+  const t = getToken();
+  return t ? { Authorization: `Bearer ${t}` } : {};
+}
+
+// Interfaces
 export interface RegisterData {
   email: string;
   password: string;
@@ -15,6 +36,7 @@ export interface LoginData {
   role: string;
 }
 
+// Auth API functions
 export async function registerUser(data: RegisterData) {
   const res = await fetch(`${API_BASE}/auth/register`, {
     method: 'POST',
@@ -22,7 +44,8 @@ export async function registerUser(data: RegisterData) {
     body: JSON.stringify(data),
   });
   if (!res.ok) {
-    throw new Error('Failed to register');
+    const error = await res.json();
+    throw new Error(error.detail || 'Failed to register');
   }
   return res.json();
 }
@@ -37,24 +60,15 @@ export async function login(data: LoginData) {
     const error = await res.json();
     throw new Error(error.detail || 'Failed to login');
   }
-  return res.json();
-}
-
-export function storeToken(token: string) {
-  localStorage.setItem('token', token);
-}
-
-export function getToken() {
-  return localStorage.getItem('token');
+  const result = await res.json();
+  if (result.access_token) {
+    storeToken(result.access_token);
+  }
+  return result;
 }
 
 export function logout() {
-  localStorage.removeItem('token');
-}
-
-function authHeaders(): Record<string, string> {
-  const token = getToken();
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  clearAllTokens();
 }
 
 export interface ApplicationData {
