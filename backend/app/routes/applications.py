@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from typing import List
 from pathlib import Path
+import os
 import shutil
 
 from app.dependencies import get_db
@@ -59,10 +60,18 @@ def upload_application_files(
 
     attachments = []
     for uploaded_file in files:
-        file_location = upload_dir / uploaded_file.filename
+        filename = os.path.basename(uploaded_file.filename)
+        if ".." in filename:
+            raise HTTPException(status_code=400, detail="Invalid filename")
+        file_location = upload_dir / filename
         with file_location.open("wb") as buffer:
             shutil.copyfileobj(uploaded_file.file, buffer)
-        attachment = create_attachment(db, application.id, str(file_location), document_id=document_id)
+        attachment = create_attachment(
+            db,
+            application.id,
+            str(file_location),
+            document_id=document_id,
+        )
         attachments.append(attachment)
     return attachments
 
