@@ -17,7 +17,6 @@ const schema = z.object({
   is_open: z.boolean().optional(),
   documents: z.array(docSchema),
 })
-
 type FormValues = z.infer<typeof schema>
 
 export default function CreateCallPage() {
