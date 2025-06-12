@@ -1,10 +1,10 @@
+// src/pages/CallManagementPage.tsx
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Search as SearchIcon, Pencil, Trash2, Eye } from '../components/icons'
-
 import { Input } from '../components/ui/Input'
 import { Button } from '../components/ui/Button'
-import { Card, CardContent, CardHeader } from '../components/ui/Card'
+import { Card, CardHeader, CardContent } from '../components/ui/Card'
 import {
   Table,
   TableHeader,
@@ -13,20 +13,17 @@ import {
   TableBody,
   TableCell,
 } from '../components/ui/Table'
-import {
-  fetchCalls,
-  deleteCall,
-  type Call,
-} from '../api'
+import { fetchCalls, deleteCall, type Call } from '../api'
 import { useToast } from '../components/ToastProvider'
 
 export default function CallManagementPage() {
   const [calls, setCalls] = useState<Call[]>([])
-  const navigate = useNavigate()
+  const [deletingId, setDeletingId] = useState<number | null>(null)
   const [searchText, setSearchText] = useState('')
   const [sortField, setSortField] = useState<'title' | 'open' | null>(null)
   const [sortAsc, setSortAsc] = useState(true)
   const { showToast } = useToast()
+  const navigate = useNavigate()
 
   const loadCalls = () => {
     fetchCalls()
@@ -52,20 +49,25 @@ export default function CallManagementPage() {
   }
 
   const onDelete = async (id: number) => {
+    setDeletingId(id)
     try {
       await deleteCall(id)
       showToast('Call deleted', 'success')
       loadCalls()
     } catch {
       showToast('Failed to delete call', 'error')
+    } finally {
+      setDeletingId(null)
     }
   }
 
-  const filtered = calls.filter(
-    (c) =>
-      c.title.toLowerCase().includes(searchText.toLowerCase()) ||
-      (c.description || '').toLowerCase().includes(searchText.toLowerCase()),
+  // Filter by search text
+  const filtered = calls.filter((c) =>
+    c.title.toLowerCase().includes(searchText.toLowerCase()) ||
+    (c.description || '').toLowerCase().includes(searchText.toLowerCase()),
   )
+
+  // Sort if requested
   const sorted = [...filtered]
   if (sortField === 'title') {
     sorted.sort((a, b) =>
@@ -73,19 +75,20 @@ export default function CallManagementPage() {
     )
   } else if (sortField === 'open') {
     sorted.sort((a, b) => {
-      if (a.is_open === b.is_open) return 0
-      const res = a.is_open ? -1 : 1
-      return sortAsc ? res : -res
+      const diff = (a.is_open === b.is_open) ? 0 : (a.is_open ? -1 : 1)
+      return sortAsc ? diff : -diff
     })
   }
 
   return (
     <section className="space-y-6">
       <h1 className="text-xl font-bold">Call Management</h1>
+
       <Card>
         <CardHeader className="flex justify-between items-center">
           <h2 className="font-semibold text-lg">Calls</h2>
         </CardHeader>
+
         <CardContent className="space-y-4">
           <div className="max-w-xs">
             <div className="relative">
@@ -98,20 +101,28 @@ export default function CallManagementPage() {
               />
             </div>
           </div>
+
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="cursor-pointer" onClick={() => handleSort('title')}>
+                  <TableHead
+                    className="cursor-pointer"
+                    onClick={() => handleSort('title')}
+                  >
                     Title
                   </TableHead>
                   <TableHead className="hidden md:table-cell">Description</TableHead>
-                  <TableHead className="cursor-pointer text-center" onClick={() => handleSort('open')}>
+                  <TableHead
+                    className="cursor-pointer text-center"
+                    onClick={() => handleSort('open')}
+                  >
                     Open
                   </TableHead>
                   <TableHead className="text-center">Actions</TableHead>
                 </TableRow>
               </TableHeader>
+
               <TableBody>
                 {sorted.map((c, idx) => (
                   <TableRow
@@ -119,21 +130,44 @@ export default function CallManagementPage() {
                     className={`${idx % 2 ? 'bg-gray-50' : ''} hover:bg-gray-50`}
                   >
                     <TableCell className="font-medium">{c.title}</TableCell>
-                    <TableCell className="hidden md:table-cell">{c.description}</TableCell>
-                    <TableCell className="text-center">{c.is_open ? 'Yes' : 'No'}</TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      {c.description}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {c.is_open ? 'Yes' : 'No'}
+                    </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-2 justify-center">
-                        <Button variant="outline" size="sm" onClick={() => onEdit(c.id)}>
-                          <Pencil className="h-4 w-4 mr-1" /> Edit
+
+                        {/* EDIT */}
+                        <Button
+                          variant="outline"
+                          onClick={() => onEdit(c.id)}
+                          className="flex items-center text-sm px-2 py-1"
+                        >
+                          <Pencil className="h-4 w-4 mr-1" />
+                          Edit
                         </Button>
-                        <Button variant="destructive" size="sm" onClick={() => onDelete(c.id)}>
-                          <Trash2 className="h-4 w-4 mr-1" /> Delete
+
+                        {/* DELETE */}
+                        <Button
+                          variant="destructive"
+                          onClick={() => onDelete(c.id)}
+                          disabled={deletingId === c.id}
+                          className="flex items-center text-sm px-2 py-1 disabled:opacity-50"
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          {deletingId === c.id ? 'Deleting…' : 'Delete'}
                         </Button>
-                        <Button variant="link" size="sm" asChild>
-                          <Link to={`/admin/calls/${c.id}/applications`} className="flex items-center">
-                            <Eye className="h-4 w-4 mr-1" /> View
-                          </Link>
-                        </Button>
+
+                        {/* VIEW */}
+                        <Link
+                          to={`/admin/calls/${c.id}/applications`}
+                          className="flex items-center text-sm px-2 py-1 underline hover:no-underline"
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          View
+                        </Link>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -145,7 +179,9 @@ export default function CallManagementPage() {
       </Card>
 
       <div>
-        <Link to="/admin/calls/new" className="underline text-blue-600">Create New Call</Link>
+        <Link to="/admin/calls/new" className="underline text-blue-600">
+          Create New Call
+        </Link>
       </div>
     </section>
   )
