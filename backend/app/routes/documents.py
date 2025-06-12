@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.dependencies import get_db
 from ..dependencies import get_current_admin, get_current_user
+from ..crud.call import get_call
 from ..schemas.document import (
     DocumentDefinitionCreate,
     DocumentDefinitionOut,
@@ -26,6 +27,9 @@ def create_definition(
     db: Session = Depends(get_db),
     current_admin=Depends(get_current_admin),
 ):
+    call = get_call(db, call_id)
+    if not call:
+        raise HTTPException(status_code=404, detail="Call not found")
     create_document_definition(
         db, call_id, doc_in.name, doc_in.allowed_formats, doc_in.description
     )
@@ -43,6 +47,9 @@ def update_definition(
     db: Session = Depends(get_db),
     current_admin=Depends(get_current_admin),
 ):
+    call = get_call(db, call_id)
+    if not call:
+        raise HTTPException(status_code=404, detail="Call not found")
     doc = (
         db.query(DocumentDefinition)
         .filter(DocumentDefinition.id == doc_id, DocumentDefinition.call_id == call_id)
@@ -67,6 +74,9 @@ def delete_definition(
     db: Session = Depends(get_db),
     current_admin=Depends(get_current_admin),
 ):
+    call = get_call(db, call_id)
+    if not call:
+        raise HTTPException(status_code=404, detail="Call not found")
     doc = (
         db.query(DocumentDefinition)
         .filter(DocumentDefinition.id == doc_id, DocumentDefinition.call_id == call_id)
@@ -84,4 +94,7 @@ def get_definitions(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
+    call = get_call(db, call_id)
+    if not call:
+        raise HTTPException(status_code=404, detail="Call not found")
     return list_document_definitions(db, call_id)
