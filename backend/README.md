@@ -8,6 +8,8 @@ This directory contains the FastAPI backend for **Proje Çağrısı Değerlendir
 # Build and run the app with Docker
 cd backend
 cp .env.example .env
+# Disable automatic table creation so migrations manage the schema
+sed -i 's/^CREATE_TABLES=.*/CREATE_TABLES=false/' .env
 docker-compose up --build
 ```
 
