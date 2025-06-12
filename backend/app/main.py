@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.middleware.gzip import GZipMiddleware
@@ -37,12 +37,31 @@ async def on_startup() -> None:
         raise
 
 # Error handling
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    """Return HTTP errors with CORS headers so the browser can read them."""
+    allowed = [o.strip() for o in settings.allowed_origins.split(',')]
+    origin = request.headers.get("origin")
+    headers = {}
+    if "*" in allowed or (origin and origin in allowed):
+        headers["Access-Control-Allow-Origin"] = origin or "*"
+        headers["Access-Control-Allow-Credentials"] = "true"
+    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail}, headers=headers)
+
+
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     logger.error(f"Global exception: {exc}", exc_info=True)
+    allowed = [o.strip() for o in settings.allowed_origins.split(',')]
+    origin = request.headers.get("origin")
+    headers = {}
+    if "*" in allowed or (origin and origin in allowed):
+        headers["Access-Control-Allow-Origin"] = origin or "*"
+        headers["Access-Control-Allow-Credentials"] = "true"
     return JSONResponse(
         status_code=500,
-        content={"detail": "Internal server error"}
+        content={"detail": "Internal server error"},
+        headers=headers,
     )
 
 # Middleware
