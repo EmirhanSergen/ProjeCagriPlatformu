@@ -45,5 +45,20 @@ def get_current_user(
 def get_current_admin(current_user: User = Depends(get_current_user)) -> User:
     """Ensure the current user has admin privileges."""
     if current_user.role != UserRole.ADMIN:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough privileges")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough privileges",
+        )
+    return current_user
+
+
+def get_current_admin_or_reviewer(
+    current_user: User = Depends(get_current_user),
+) -> User:
+    """Allow access to admins and reviewers."""
+    if current_user.role not in (UserRole.ADMIN, UserRole.REVIEWER):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough privileges",
+        )
     return current_user

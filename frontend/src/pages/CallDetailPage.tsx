@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import {
@@ -7,8 +8,11 @@ import {
 } from '../api'
 import ApplicationDocumentsPage from './ApplicationDocumentsPage'
 import ApplicationPreview from './ApplicationPreview'
+import ApplicationList from '../components/ApplicationList'
+import { useAuth } from '../components/AuthProvider'
 
 export default function CallDetailPage() {
+  const { role } = useAuth()
   const { callId } = useParams()
   const id = Number(callId)
 
@@ -21,13 +25,13 @@ export default function CallDetailPage() {
   useQuery({
     queryKey: ['docs', id],
     queryFn: () => fetchDocumentDefinitions(id),
-    enabled: !!callId,
+    enabled: !!callId && role === 'applicant',
   })
 
   const applicationQuery = useQuery({
     queryKey: ['application', id],
     queryFn: () => fetchApplicationByUserAndCall(id),
-    enabled: !!callId,
+    enabled: !!callId && role === 'applicant',
     retry: false,
   })
 
@@ -41,7 +45,26 @@ export default function CallDetailPage() {
     <section className="space-y-4">
       <h1 className="text-xl font-bold">{callQuery.data?.title}</h1>
       {callQuery.data?.description && <p>{callQuery.data.description}</p>}
-      {hasApplied ? <ApplicationPreview /> : <ApplicationDocumentsPage />}
+      {role === 'applicant' && (
+        <>{hasApplied ? <ApplicationPreview /> : <ApplicationDocumentsPage />}</>
+      )}
+      {role === 'reviewer' && <ApplicationList callId={id} />}
+      {role === 'admin' && (
+        <div className="space-x-4">
+          <Link
+            to={`/admin/calls/${id}/edit`}
+            className="underline text-blue-600"
+          >
+            Edit Call
+          </Link>
+          <Link
+            to={`/admin/calls/${id}/applications`}
+            className="underline text-blue-600"
+          >
+            View Applications
+          </Link>
+        </div>
+      )}
     </section>
   )
 }
