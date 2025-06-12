@@ -5,12 +5,16 @@ from ..schemas.document import DocumentFormat
 
 
 def create_document_definition(
-    db: Session, call_id: int, name: str, allowed_formats: DocumentFormat, description: str | None = None
+    db: Session,
+    call_id: int,
+    name: str,
+    allowed_formats: DocumentFormat,
+    description: str | None = None,
 ) -> DocumentDefinition:
     doc = DocumentDefinition(
         call_id=call_id,
         name=name,
-        allowed_formats=allowed_formats,
+        allowed_formats=allowed_formats.value,
         description=description,
     )
     db.add(doc)
@@ -29,7 +33,7 @@ def update_document_definition(
     if name is not None:
         doc.name = name
     if allowed_formats is not None:
-        doc.allowed_formats = allowed_formats
+        doc.allowed_formats = allowed_formats.value
     if description is not None:
         doc.description = description
     db.add(doc)
@@ -44,4 +48,6 @@ def delete_document_definition(db: Session, doc: DocumentDefinition) -> None:
 
 
 def list_document_definitions(db: Session, call_id: int) -> list[DocumentDefinition]:
-    return db.query(DocumentDefinition).filter(DocumentDefinition.call_id == call_id).all()
+    return (
+        db.query(DocumentDefinition).filter(DocumentDefinition.call_id == call_id).all()
+    )

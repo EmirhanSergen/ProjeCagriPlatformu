@@ -3,6 +3,7 @@ from fastapi.responses import Response as FastAPIResponse
 from fastapi.templating import Jinja2Templates
 import pdfkit
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.dependencies import get_db
 from ..dependencies import get_current_admin, get_current_admin_or_reviewer
@@ -47,26 +48,30 @@ def create_call_with_defs(
     current_admin: User = Depends(get_current_admin),
 ):
     """Create a call along with its document definitions atomically."""
-    with db.begin_nested():
-        call = Call(
-            title=call_in.title,
-            description=call_in.description,
-            is_open=True if call_in.is_open is None else call_in.is_open,
-        )
-        db.add(call)
-        db.flush()
-        for doc_def in call_in.documents:
-            db.add(
-                DocumentDefinition(
-                    call_id=call.id,
-                    name=doc_def.name,
-                    description=doc_def.description,
-                    allowed_formats=doc_def.allowed_formats,
-                )
+    try:
+        with db.begin_nested():
+            call = Call(
+                title=call_in.title,
+                description=call_in.description,
+                is_open=True if call_in.is_open is None else call_in.is_open,
             )
-    db.commit()
-    db.refresh(call)
-    return call
+            db.add(call)
+            db.flush()
+            for doc_def in call_in.documents:
+                db.add(
+                    DocumentDefinition(
+                        call_id=call.id,
+                        name=doc_def.name,
+                        description=doc_def.description,
+                        allowed_formats=doc_def.allowed_formats.value,
+                    )
+                )
+        db.commit()
+        db.refresh(call)
+        return call
+    except SQLAlchemyError as exc:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(exc))
 
 
 @router.get("/", response_model=list[CallOut])
