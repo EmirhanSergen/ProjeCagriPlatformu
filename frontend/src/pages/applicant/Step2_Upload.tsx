@@ -5,6 +5,7 @@ import {
   fetchApplicationByUserAndCall,
   fetchDocumentDefinitions,
   uploadDocuments,
+  deleteAttachment,
   fetchAttachmentsByApplicationId,
   type Call,
   type Application,
@@ -54,14 +55,34 @@ export default function Step2_Upload() {
         })
     }, [application?.id, showToast])
 
-    const handleUpload = async () => {
+  // Clear selected files when switching documents
+  useEffect(() => {
+    setSelectedFiles([])
+  }, [selectedDocId])
+
+  const handleUpload = async () => {
     if (!application?.id || !selectedDocId || !selectedFiles.length) return
+
+    const existing = attachments.find(a => a.document_id === selectedDocId)
+    if (existing) {
+      const confirmed = window.confirm(
+        'This document already has a file. Uploading again will replace the existing one. Continue?'
+      )
+      if (!confirmed) return
+      try {
+        await deleteAttachment(existing.id)
+        setAttachments(prev => prev.filter(a => a.id !== existing.id))
+      } catch (e) {
+        showToast('Failed to remove old file', 'error')
+        return
+      }
+    }
 
     try {
       const newAtts = await uploadDocuments(
         cid,
         selectedDocId,
-        selectedFiles
+        [selectedFiles[0]]
       )
       showToast('Upload successful', 'success')
       setSelectedFiles([])
@@ -108,7 +129,6 @@ export default function Step2_Upload() {
             </p>
             <Input
               type="file"
-              multiple
               onChange={e => setSelectedFiles(Array.from(e.target.files || []))}
             />
             <Button onClick={handleUpload} className="mt-2">
@@ -121,7 +141,7 @@ export default function Step2_Upload() {
                 .map(a => (
                   <div key={a.id}>
                     <a
-                      href={`${import.meta.env.VITE_API_BASE}/attachments/${a.id}/download`}
+                      href={`${import.meta.env.VITE_API_BASE}/applications/attachments/${a.id}/download`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-600 underline text-sm"

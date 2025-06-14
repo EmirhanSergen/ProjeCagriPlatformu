@@ -95,6 +95,17 @@ export async function fetchAttachmentsByApplicationId(appId: number): Promise<At
   return res.json()
 }
 
+export async function deleteAttachment(attachmentId: number): Promise<void> {
+  const res = await fetch(
+    `${API_BASE}/applications/attachments/${attachmentId}`,
+    {
+      method: 'DELETE',
+      headers: authHeaders(),
+    }
+  )
+  if (!res.ok) throw new Error('Failed to delete attachment')
+}
+
 // 7. Dosya(lar) yükle (multi-file legacy; doküman bazlı tekil isimlendirme için, 
 //    ayrıca create_attachment kullanan /upload endpoint’iniz de çalışır)
 export async function uploadDocuments(

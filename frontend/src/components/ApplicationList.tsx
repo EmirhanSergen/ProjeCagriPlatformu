@@ -61,7 +61,7 @@ export default function ApplicationList({ callId }: Props) {
                   {app.attachments.map((att) => (
                     <li key={att.id}>
                       <a
-                        href={`${import.meta.env.VITE_API_BASE || 'http://localhost:8000'}/attachments/${att.id}/download`}
+                        href={`${import.meta.env.VITE_API_BASE || 'http://localhost:8000'}/applications/attachments/${att.id}/download`}
                         className="text-blue-600 underline"
                         target="_blank"
                         rel="noopener noreferrer"

@@ -37,7 +37,7 @@ export default function ApplicationDetailPage() {
             {application.attachments.map((doc: Attachment) => (
               <li key={doc.id}>
                 <a
-                  href={`${API_BASE}/attachments/${doc.id}/download`}
+                  href={`${API_BASE}/applications/attachments/${doc.id}/download`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 hover:underline"
