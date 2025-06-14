@@ -3,7 +3,9 @@ from pydantic import BaseModel, ConfigDict
 
 class AttachmentCreate(BaseModel):
     application_id: int
-    file_path: str
+    document_id: int | None = None
+    file_name: str
+    data: bytes
     is_confirmed: bool = False
 
 
@@ -11,7 +13,8 @@ class AttachmentCreate(BaseModel):
 class AttachmentOut(BaseModel):
     id: int
     application_id: int
-    file_path: str
+    document_id: int | None
+    file_name: str
     is_confirmed: bool
 
     model_config = ConfigDict(from_attributes=True)
