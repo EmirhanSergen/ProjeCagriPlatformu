@@ -69,12 +69,12 @@ export default function Step3_Review() {
                 files.map(file => (
                   <li key={file.id}>
                     <a
-                      href={`${import.meta.env.VITE_API_BASE}/uploads/${file.file_path}`}
+                      href={`${import.meta.env.VITE_API_BASE}/attachments/${file.id}/download`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-600 underline"
                     >
-                      {file.file_path.split('/').pop()}
+                      {file.file_name}
                     </a>
                   </li>
                 ))

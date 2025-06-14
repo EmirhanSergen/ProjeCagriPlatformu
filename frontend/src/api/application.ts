@@ -20,7 +20,7 @@ export interface MyApplication extends Application {
 
 export interface Attachment {
   id: number
-  file_path: string
+  file_name: string
   document_id: number
 }
 

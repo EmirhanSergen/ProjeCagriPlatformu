@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query, 
 from sqlalchemy.orm import Session
 from typing import List
 from pathlib import Path as Pathlib
-import os, shutil, uuid
+import os, uuid
 
 from app.dependencies import get_db
 from ..dependencies import get_current_user, get_current_admin, get_current_admin_or_reviewer
@@ -72,9 +72,6 @@ def upload_application_files(
     if attachments_confirmed(db, application.id):
         raise HTTPException(status_code=400, detail="Attachments already confirmed")
 
-    upload_dir = Pathlib(settings.upload_dir) / str(application.id)
-    upload_dir.mkdir(parents=True, exist_ok=True)
-
     attachments: List[Attachment] = []
     for file in files:
         filename = os.path.basename(file.filename)
@@ -93,15 +90,13 @@ def upload_application_files(
             raise HTTPException(status_code=400, detail=f"Invalid file format: .{ext}")
 
         unique_name = f"{uuid.uuid4().hex}_{filename}"
-        target = upload_dir / unique_name
-        with target.open("wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+        data = file.file.read()
 
-        # Burada create_attachment yerine manuel ekleme yapıyoruz:
         attachment = Attachment(
             application_id=application.id,
             document_id=document_id,
-            file_path=str(target),
+            file_name=unique_name,
+            data=data,
             is_confirmed=False,
         )
         db.add(attachment)
@@ -136,14 +131,16 @@ def upload_attachment(
     if ext not in document.allowed_formats.split(','):
         raise HTTPException(status_code=400, detail=f"Invalid file format: .{ext}")
 
-    upload_dir = os.path.join(settings.upload_dir, str(application.id))
-    os.makedirs(upload_dir, exist_ok=True)
     filename = f"{uuid.uuid4().hex}.{ext}"
-    file_path = os.path.join(upload_dir, filename)
-    with open(file_path, "wb") as f:
-        shutil.copyfileobj(file.file, f)
+    data = file.file.read()
 
-    attachment = Attachment(application_id=application.id, document_id=document.id, file_path=file_path, is_confirmed=False)
+    attachment = Attachment(
+        application_id=application.id,
+        document_id=document.id,
+        file_name=filename,
+        data=data,
+        is_confirmed=False,
+    )
     db.add(attachment)
     db.commit()
     db.refresh(attachment)
@@ -161,6 +158,25 @@ def list_attachments(
         raise HTTPException(status_code=404, detail="Application not found")
     return get_attachments_by_application(db, application.id)
 
+# Download attachment data
+@router.get("/attachments/{attachment_id}/download")
+def download_attachment(
+    attachment_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user),
+):
+    attachment = db.query(Attachment).join(Application).filter(
+        Attachment.id == attachment_id,
+        Application.user_id == current_user.id,
+    ).first()
+    if not attachment:
+        raise HTTPException(status_code=404, detail="Attachment not found")
+    return Response(
+        content=attachment.data,
+        media_type="application/octet-stream",
+        headers={"Content-Disposition": f"attachment; filename={attachment.file_name}"},
+    )
+
 # Delete an attachment by its ID
 @router.delete("/attachments/{attachment_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_attachment_route(
@@ -174,10 +190,6 @@ def delete_attachment_route(
     ).first()
     if not attachment:
         raise HTTPException(status_code=404, detail="Attachment not found")
-    try:
-        os.remove(attachment.file_path)
-    except OSError:
-        pass
     delete_attachment(db, attachment_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
