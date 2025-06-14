@@ -3,6 +3,8 @@ from enum import Enum as PyEnum
 from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, Enum, CheckConstraint
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
+from datetime import datetime, timezone
+
 
 from ..database import Base
 
@@ -41,7 +43,7 @@ class Call(Base):
     @property
     def is_active(self) -> bool:
         """Return whether the call is currently active based on dates and status."""
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
         return (
             self.status == CallStatus.PUBLISHED
             and (self.start_date is None or self.start_date <= now)
