@@ -121,12 +121,12 @@ export default function Step2_Upload() {
                 .map(a => (
                   <div key={a.id}>
                     <a
-                      href={`${import.meta.env.VITE_API_BASE}/uploads/${a.file_path}`}
+                      href={`${import.meta.env.VITE_API_BASE}/attachments/${a.id}/download`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-600 underline text-sm"
                     >
-                      {a.file_path.split('/').pop()}
+                      {a.file_name}
                     </a>
                   </div>
                 ))}

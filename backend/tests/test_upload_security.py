@@ -1,6 +1,5 @@
 import os
 import io
-import shutil
 import pytest
 from fastapi.testclient import TestClient
 
@@ -52,7 +51,6 @@ def client():
         yield c
 
     app.dependency_overrides.clear()
-    shutil.rmtree("uploads", ignore_errors=True)
     if os.path.exists("test.db"):
         os.remove("test.db")
 
@@ -72,5 +70,4 @@ def test_strips_directory_components(client):
     )
     assert response.status_code == 200
     data = response.json()
-    assert data[0]["file_path"].endswith("bar.txt")
-    assert os.path.exists(data[0]["file_path"])
+    assert data[0]["file_name"].endswith("bar.txt")

@@ -1,55 +1,82 @@
-import { useParams, useLocation, Link, Outlet } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { fetchCall, type Call } from '../../api'
+import { Link } from 'react-router-dom'
+import { format } from 'date-fns'
+import { fetchMyApplications, fetchCall, type MyApplication, type Call } from '../../api'
 import { useToast } from '../../components/ToastProvider'
-import { cn } from '../../lib/utils'
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from '../../components/ui/Table'
 
-const steps = [
-  { key: 'step1', path: 'step1', label: 'Call Info' },
-  { key: 'step2', path: 'step2', label: 'Upload Documents' },
-  { key: 'step3', path: 'step3', label: 'Review' },
-  { key: 'step4', path: 'step4', label: 'Submit' },
-]
+interface MyAppWithCall extends MyApplication {
+  callTitle?: string
+}
 
-export default function ApplicationLayout() {
-  const { callId } = useParams()
-  const location = useLocation()
-  const [call, setCall] = useState<Call | null>(null)
+export default function MyApplicationsPage() {
+  const [applications, setApplications] = useState<MyAppWithCall[]>([])
+  const [loading, setLoading] = useState(true)
   const { showToast } = useToast()
 
   useEffect(() => {
-    if (!callId) return
-    fetchCall(Number(callId))
-      .then(setCall)
-      .catch(() => showToast('Failed to load call info', 'error'))
-  }, [callId, showToast])
+    fetchMyApplications()
+      .then(async apps => {
+        const appsWithCalls = await Promise.all(
+          apps.map(async app => {
+            let call: Call | null = null
+            try {
+              call = await fetchCall(app.call_id)
+            } catch {
+              // ignore - call title will be fallback
+            }
+            return { ...app, callTitle: call?.title }
+          })
+        )
+        setApplications(appsWithCalls)
+      })
+      .catch(() => showToast('Failed to load applications', 'error'))
+      .finally(() => setLoading(false))
+  }, [showToast])
 
-  if (!call) return <p className="p-4">Loading...</p>
+  if (loading) return <p className="p-4">Loading...</p>
+
+  if (applications.length === 0)
+    return <p className="p-4">You have no applications yet.</p>
 
   return (
-    <div className="flex min-h-[80vh]">
-      <aside className="w-64 p-4 border-r bg-gray-50">
-        <h2 className="text-lg font-semibold mb-4">Application Steps</h2>
-        <nav className="space-y-2">
-          {steps.map((step) => (
-            <Link
-              key={step.key}
-              to={`/applicant/${callId}/${step.path}`}
-              className={cn(
-                'block px-3 py-2 rounded text-sm hover:bg-blue-100',
-                location.pathname.includes(step.path)
-                  ? 'bg-blue-100 font-medium text-blue-800'
-                  : 'text-gray-700'
-              )}
-            >
-              {step.label}
-            </Link>
+    <section className="p-4 space-y-4">
+      <h1 className="text-xl font-bold">My Applications</h1>
+      <Table className="bg-white shadow rounded">
+        <TableHeader>
+          <TableRow>
+            <TableHead>Call</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Created</TableHead>
+            <TableHead className="text-right">Action</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {applications.map(app => (
+            <TableRow key={app.id}>
+              <TableCell>{app.callTitle ?? `Call #${app.call_id}`}</TableCell>
+              <TableCell>{app.status}</TableCell>
+              <TableCell>{format(new Date(app.created_at), 'yyyy-MM-dd')}</TableCell>
+              <TableCell className="text-right">
+                <Link
+                  to={`/applicant/${app.call_id}/step1`}
+                  className="text-blue-600 hover:underline"
+                >
+                  {app.status === 'DRAFT' ? 'Continue' : 'View'}
+                </Link>
+              </TableCell>
+            </TableRow>
           ))}
-        </nav>
-      </aside>
-      <main className="flex-1 p-6">
-        <Outlet />
-      </main>
-    </div>
+        </TableBody>
+      </Table>
+    </section>
   )
 }
+
