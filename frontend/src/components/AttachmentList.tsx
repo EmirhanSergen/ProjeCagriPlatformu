@@ -1,4 +1,5 @@
 import type { Attachment } from '../api'
+import { downloadAttachment } from '../api'
 
 
 interface Props {
@@ -10,14 +11,20 @@ export default function AttachmentList({ attachments }: Props) {
     <ul className="list-disc pl-5">
       {attachments.map((a) => (
         <li key={a.id}>
-          <a
-            href={`${import.meta.env.VITE_API_BASE || 'http://localhost:8000'}/applications/attachments/${a.id}/download`}
+          <button
+            onClick={async () => {
+              try {
+                const blob = await downloadAttachment(a.id)
+                const url = URL.createObjectURL(blob)
+                window.open(url, '_blank')
+              } catch {
+                // AttachmentList has no toast context by default; swallow errors
+              }
+            }}
             className="text-blue-600 underline"
-            target="_blank"
-            rel="noreferrer"
           >
             {a.file_name}
-          </a>
+          </button>
         </li>
       ))}
     </ul>

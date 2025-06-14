@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { fetchApplications, type ApplicationDetail } from '../api';
+import { fetchApplications, type ApplicationDetail, downloadAttachment } from '../api';
 import { useToast } from './ToastProvider';
 
 interface Props {
@@ -60,14 +60,20 @@ export default function ApplicationList({ callId }: Props) {
                 <ul className="list-disc pl-5">
                   {app.attachments.map((att) => (
                     <li key={att.id}>
-                      <a
-                        href={`${import.meta.env.VITE_API_BASE || 'http://localhost:8000'}/applications/attachments/${att.id}/download`}
+                      <button
+                        onClick={async () => {
+                          try {
+                            const blob = await downloadAttachment(att.id)
+                            const url = URL.createObjectURL(blob)
+                            window.open(url, '_blank')
+                          } catch {
+                            showToast('Failed to download file', 'error')
+                          }
+                        }}
                         className="text-blue-600 underline"
-                        target="_blank"
-                        rel="noopener noreferrer"
                       >
                         {att.file_name}
-                      </a>
+                      </button>
                     </li>
                   ))}
                 </ul>

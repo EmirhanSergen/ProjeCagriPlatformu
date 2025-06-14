@@ -96,6 +96,17 @@ export async function fetchAttachmentsByApplicationId(appId: number): Promise<At
   return res.json()
 }
 
+export async function downloadAttachment(attachmentId: number): Promise<Blob> {
+  const res = await fetch(
+    `${API_BASE}/applications/attachments/${attachmentId}/download`,
+    {
+      headers: authHeaders(),
+    }
+  )
+  if (!res.ok) throw new Error('Failed to download attachment')
+  return res.blob()
+}
+
 export async function deleteAttachment(attachmentId: number): Promise<void> {
   const res = await fetch(
     `${API_BASE}/applications/attachments/${attachmentId}`,
