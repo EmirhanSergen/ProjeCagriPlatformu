@@ -3,36 +3,33 @@ import { useAuth } from './AuthProvider'
 
 function Navbar() {
   const { token, role, logout } = useAuth()
+
   return (
     <nav className="bg-gray-800 text-white">
-      <div className="mx-[5%] grid grid-cols-1 gap-4 py-3 sm:grid-cols-4 items-center">
+      <div className="mx-[5%] flex flex-col sm:flex-row sm:justify-between items-center py-3">
         {/* Logo */}
-        <div className="flex justify-center sm:justify-start">
+        <div className="mb-2 sm:mb-0">
           <Link to="/" className="text-lg font-semibold hover:underline">
             Project Call Platform
           </Link>
         </div>
 
         {/* Main links */}
-        <div className="flex justify-center space-x-8">
+        <div className="flex justify-center flex-wrap gap-x-8 mb-2 sm:mb-0">
           <Link to="/" className="hover:underline">Home</Link>
-          {token && (
-            <Link to="/calls" className="hover:underline">Calls</Link>
-          )}
+          {token && <Link to="/calls" className="hover:underline">Calls</Link>}
           <Link to="/about" className="hover:underline">About</Link>
-          {/* Yalnız applicant */}
           {token && role === 'applicant' && (
             <Link to="/my-applications" className="hover:underline">
               My Applications
             </Link>
           )}
           {token && role === 'admin' && (
-            <Link to="/admin/calls" className="hover:underline">Manage Calls</Link>
+            <Link to="/admin/calls" className="hover:underline">
+              Manage Calls
+            </Link>
           )}
         </div>
-
-        {/* Spacer */}
-        <div />
 
         {/* Auth buttons */}
         <div className="flex justify-center sm:justify-end space-x-4">
