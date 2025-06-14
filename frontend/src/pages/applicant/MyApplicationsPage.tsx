@@ -11,9 +11,18 @@ import {
   TableBody,
   TableCell,
 } from '../../components/ui/Table'
+import { Button } from '../../components/ui/Button'
+import { Badge } from '../../components/ui/Badge' // Badge bileşenini doğru kullanacağız
 
 interface MyAppWithCall extends MyApplication {
   callTitle?: string
+}
+
+const statusColorMap: Record<string, string> = {
+  DRAFT: 'bg-yellow-100 text-yellow-800',
+  SUBMITTED: 'bg-blue-100 text-blue-800',
+  CLOSED: 'bg-gray-200 text-gray-800',
+  ARCHIVED: 'bg-red-100 text-red-800',
 }
 
 export default function MyApplicationsPage() {
@@ -30,7 +39,7 @@ export default function MyApplicationsPage() {
             try {
               call = await fetchCall(app.call_id)
             } catch {
-              // ignore - call title will be fallback
+              // ignore error
             }
             return { ...app, callTitle: call?.title }
           })
@@ -43,40 +52,57 @@ export default function MyApplicationsPage() {
 
   if (loading) return <p className="p-4">Loading...</p>
 
-  if (applications.length === 0)
-    return <p className="p-4">You have no applications yet.</p>
-
   return (
-    <section className="p-4 space-y-4">
-      <h1 className="text-xl font-bold">My Applications</h1>
-      <Table className="bg-white shadow rounded">
-        <TableHeader>
-          <TableRow>
-            <TableHead>Call</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Created</TableHead>
-            <TableHead className="text-right">Action</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {applications.map(app => (
-            <TableRow key={app.id}>
-              <TableCell>{app.callTitle ?? `Call #${app.call_id}`}</TableCell>
-              <TableCell>{app.status}</TableCell>
-              <TableCell>{format(new Date(app.created_at), 'yyyy-MM-dd')}</TableCell>
-              <TableCell className="text-right">
-                <Link
-                  to={`/applicant/${app.call_id}/step1`}
-                  className="text-blue-600 hover:underline"
-                >
-                  {app.status === 'DRAFT' ? 'Continue' : 'View'}
-                </Link>
-              </TableCell>
+    <section className="p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-semibold">My Applications</h1>
+        <Link to="/calls">
+          <Button>📂 Browse Calls</Button>
+        </Link>
+      </div>
+
+      {applications.length === 0 ? (
+        <div className="text-center mt-8 text-gray-600">
+          <p className="mb-4">You haven’t started any applications yet.</p>
+          <Link to="/calls">
+            <Button>Browse Available Calls</Button>
+          </Link>
+        </div>
+      ) : (
+        <Table className="bg-white shadow rounded text-sm">
+          <TableHeader>
+            <TableRow className="text-gray-600 bg-gray-50">
+              <TableHead className="py-3 px-4">Call</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Created</TableHead>
+              <TableHead>Updated</TableHead>
+              <TableHead className="text-right">Action</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {applications.map(app => (
+              <TableRow key={app.id} className="hover:bg-gray-50 transition-all h-[60px]">
+                <TableCell className="font-medium">{app.callTitle ?? `Call #${app.call_id}`}</TableCell>
+                <TableCell>
+                  <Badge className={statusColorMap[app.status] || 'bg-gray-100 text-gray-800'}>
+                    {app.status}
+                  </Badge>
+                </TableCell>
+                <TableCell>{format(new Date(app.created_at), 'yyyy-MM-dd')}</TableCell>
+                <TableCell>{app.updated_at ? format(new Date(app.updated_at), 'yyyy-MM-dd') : '-'}</TableCell>
+                <TableCell className="text-right">
+                  <Link
+                    to={`/applicant/${app.call_id}/step1`}
+                    className="text-blue-600 hover:underline"
+                  >
+                    {app.status === 'DRAFT' ? 'Continue' : 'View'}
+                  </Link>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
     </section>
   )
 }
-
