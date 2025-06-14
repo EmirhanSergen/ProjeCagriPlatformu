@@ -131,20 +131,19 @@ export default function EditCallPage() {
         await Promise.all(toDelete.map(docId => deleteDocumentDefinition(id, docId)))
       }
 
-      // Update or create docs
-      await Promise.all(
-        data.items.map(async doc => {
-          const input = {
-            name: doc.name,
-            description: doc.description || '',
-            allowed_formats: doc.allowed_formats
-          }
-          if (doc.id) {
-            return updateDocumentDefinition(id, doc.id, input)
-          }
-          return createDocumentDefinition(id, input)
-        })
-      )
+      // Update or create docs sequentially to preserve order
+      for (const doc of data.items) {
+        const input = {
+          name: doc.name,
+          description: doc.description || '',
+          allowed_formats: doc.allowed_formats,
+        }
+        if (doc.id) {
+          await updateDocumentDefinition(id, doc.id, input)
+        } else {
+          await createDocumentDefinition(id, input)
+        }
+      }
 
       showToast('Call updated successfully', 'success')
       navigate('/admin/calls')

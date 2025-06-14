@@ -6,7 +6,8 @@ export interface DocumentDefinition { id: number; call_id: number; name: string;
 export async function fetchDocumentDefinitions(callId: number): Promise<DocumentDefinition[]> {
   const res = await fetch(`${API_BASE}/calls/${callId}/documents`, { headers: authHeaders() })
   if (!res.ok) throw new Error('Failed to load document definitions')
-  return res.json()
+  const docs: DocumentDefinition[] = await res.json()
+  return docs.sort((a, b) => a.id - b.id)
 }
 
 export async function createDocumentDefinition(callId: number, data: Omit<DocumentDefinition,'id'|'call_id'>): Promise<DocumentDefinition[]> {
