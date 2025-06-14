@@ -45,6 +45,14 @@ def submit_application(
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 
+# List my applications
+@router.get("/me", response_model=List[ApplicationOut], summary="List my applications")
+def list_my_applications(
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user),
+):
+    return get_applications_by_user(db, current_user.id)
+
 # Read current user's application for a call
 @router.get("/{application_id}", response_model=ApplicationOut)
 def read_application(
@@ -266,13 +274,6 @@ def delete_draft_application(
     delete_application_by_id(db, application.id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-# List my applications
-@router.get("/me", response_model=List[ApplicationOut], summary="List my applications")
-def list_my_applications(
-    db: Session = Depends(get_db),
-    current_user = Depends(get_current_user),
-):
-    return get_applications_by_user(db, current_user.id)
 
 # Get or create application by call
 @router.get("/by_call/{call_id}", response_model=ApplicationOut)
