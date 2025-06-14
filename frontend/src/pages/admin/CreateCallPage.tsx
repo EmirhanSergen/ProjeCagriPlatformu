@@ -61,15 +61,13 @@ export default function CreateCallPage() {
       })
 
       if (data.documents?.length > 0) {
-        await Promise.all(
-          data.documents.map((d) =>
-            createDocumentDefinition(newCall.id, {
-              name: d.name,
-              description: d.description ?? null,
-              allowed_formats: d.allowed_formats,
-            })
-          )
-        )
+        for (const d of data.documents) {
+          await createDocumentDefinition(newCall.id, {
+            name: d.name,
+            description: d.description ?? null,
+            allowed_formats: d.allowed_formats,
+          })
+        }
       }
 
       showToast('Call created successfully', 'success')
