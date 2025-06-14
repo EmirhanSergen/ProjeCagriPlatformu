@@ -39,10 +39,14 @@ export default function Step4_Submit() {
     if (!application) return
     try {
       await confirmDocuments(application.id)
-      submitMutate()
-    } catch {
-      showToast('Failed to confirm documents', 'error')
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e)
+      if (!msg.includes('Attachments already confirmed')) {
+        showToast(msg || 'Failed to confirm documents', 'error')
+        return
+      }
     }
+    submitMutate()
   }
 
   if (isLoading) return <p className="p-4">Loading application…</p>

@@ -154,7 +154,10 @@ export async function confirmDocuments(applicationId: number): Promise<void> {
     method: 'POST',
     headers: authHeaders(),
   })
-  if (!res.ok) throw new Error('Failed to confirm documents')
+  if (!res.ok) {
+    const err = await res.json().catch(() => null)
+    throw new Error(err?.detail || 'Failed to confirm documents')
+  }
 }
 
 // 9. Başvuruyu SUBMITTED yap
