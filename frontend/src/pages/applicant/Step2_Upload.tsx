@@ -7,6 +7,7 @@ import {
   uploadDocuments,
   deleteAttachment,
   fetchAttachmentsByApplicationId,
+  downloadAttachment,
   type Call,
   type Application,
   type DocumentDefinition,
@@ -140,14 +141,20 @@ export default function Step2_Upload() {
                 .filter(a => a.document_id === selectedDocId)
                 .map(a => (
                   <div key={a.id}>
-                    <a
-                      href={`${import.meta.env.VITE_API_BASE}/applications/attachments/${a.id}/download`}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button
+                      onClick={async () => {
+                        try {
+                          const blob = await downloadAttachment(a.id)
+                          const url = URL.createObjectURL(blob)
+                          window.open(url, '_blank')
+                        } catch {
+                          showToast('Failed to download file', 'error')
+                        }
+                      }}
                       className="text-blue-600 underline text-sm"
                     >
                       {a.file_name}
-                    </a>
+                    </button>
                   </div>
                 ))}
             </div>

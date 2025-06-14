@@ -5,6 +5,7 @@ import {
   fetchDocumentDefinitions,
   confirmDocuments,
   fetchApplicationByUserAndCall,
+  downloadAttachment,
   type Attachment,
   type DocumentDefinition,
   type Application,
@@ -68,14 +69,20 @@ export default function Step3_Review() {
               {files.length > 0 ? (
                 files.map(file => (
                   <li key={file.id}>
-                    <a
-                      href={`${import.meta.env.VITE_API_BASE}/applications/attachments/${file.id}/download`}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button
+                      onClick={async () => {
+                        try {
+                          const blob = await downloadAttachment(file.id)
+                          const url = URL.createObjectURL(blob)
+                          window.open(url, '_blank')
+                        } catch {
+                          showToast('Failed to download file', 'error')
+                        }
+                      }}
                       className="text-blue-600 underline"
                     >
                       {file.file_name}
-                    </a>
+                    </button>
                   </li>
                 ))
               ) : (
