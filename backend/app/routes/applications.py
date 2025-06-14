@@ -15,6 +15,7 @@ from app.config import settings
 from ..crud.application import (
     create_application,
     get_application_by_user_and_call,
+    get_application_for_user,
     get_applications_by_call,
     get_applications_by_user,
     delete_application_by_id,
@@ -60,7 +61,7 @@ def read_application(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user),
 ):
-    application = get_application_by_user_and_call(db, current_user.id, application_id)
+    application = get_application_for_user(db, application_id, current_user.id)
     if not application:
         raise HTTPException(status_code=404, detail="Application not found")
     return application
@@ -125,7 +126,7 @@ def upload_attachment(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user),
 ):
-    application = get_application_by_user_and_call(db, current_user.id, application_id)
+    application = get_application_for_user(db, application_id, current_user.id)
     if not application:
         raise HTTPException(status_code=404, detail="Application not found")
     if attachments_confirmed(db, application.id):
@@ -161,7 +162,7 @@ def list_attachments(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user),
 ):
-    application = get_application_by_user_and_call(db, current_user.id, application_id)
+    application = get_application_for_user(db, application_id, current_user.id)
     if not application:
         raise HTTPException(status_code=404, detail="Application not found")
     return get_attachments_by_application(db, application.id)
@@ -208,7 +209,7 @@ def confirm_application_files(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user),
 ):
-    application = get_application_by_user_and_call(db, current_user.id, application_id)
+    application = get_application_for_user(db, application_id, current_user.id)
     if not application:
         raise HTTPException(status_code=404, detail="Application not found")
     if not get_attachments_by_application(db, application.id):
@@ -226,7 +227,7 @@ def confirm_single_attachment(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user),
 ):
-    application = get_application_by_user_and_call(db, current_user.id, application_id)
+    application = get_application_for_user(db, application_id, current_user.id)
     if not application:
         raise HTTPException(status_code=404, detail="Application not found")
     attachment = db.query(Attachment).filter(
