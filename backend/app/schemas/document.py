@@ -1,6 +1,7 @@
 from enum import Enum
 
 from pydantic import BaseModel, ConfigDict
+from enum import Enum as PyEnum
 
 # Allowed document formats
 class DocumentFormat(str, Enum):
@@ -8,7 +9,6 @@ class DocumentFormat(str, Enum):
     image = "image"
     text = "text"
 
-# Schema for creating a document definition
 class DocumentDefinitionCreate(BaseModel):
     name: str
     description: str | None = None

@@ -33,7 +33,7 @@ export default function DocumentUploadForm({ callId, documentId }: Props) {
   } = useForm<FormValues>({ resolver: zodResolver(schema) })
   const { showToast } = useToast()
   const [progress, setProgress] = useState(0)
-  const intervalRef = useRef<number>()
+  const intervalRef = useRef<number | null>(null)
 
   const onSubmit = handleSubmit(async ({ documents }) => {
     const files = Array.from(documents)
@@ -41,6 +41,10 @@ export default function DocumentUploadForm({ callId, documentId }: Props) {
       await uploadDocuments(callId, documentId, files, setProgress)
       showToast('Files uploaded successfully', 'success')
       reset()
+      if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+      intervalRef.current = null
+    }
     } catch {
       showToast('Failed to upload files', 'error')
     } finally {
@@ -57,9 +61,8 @@ export default function DocumentUploadForm({ callId, documentId }: Props) {
       }, 30000)
     }
     return () => {
-      if (intervalRef.current) {
+      if (intervalRef.current !== null) {
         clearInterval(intervalRef.current)
-        intervalRef.current = undefined
       }
     }
   }, [watchedFiles, onSubmit])

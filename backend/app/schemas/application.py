@@ -1,5 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 from .attachment import AttachmentOut
+from datetime import datetime
 
 
 # Schema for creating a new application
@@ -13,9 +14,18 @@ class ApplicationOut(BaseModel):
     user_id: int
     call_id: int
     content: str
+    documents_confirmed: bool
+    status: str
+    created_at: datetime
 
-    model_config = ConfigDict(from_attributes=True) # Enables ORM-to-pydantic conversion
+    model_config = ConfigDict(from_attributes=True)
+
  
+
+class ReviewerShort(BaseModel):
+    id: int
+    name: str  # veya email
+    model_config = ConfigDict(from_attributes=True)
 
 # Detailed schema for one application with user and attachment info
 class ApplicationDetail(BaseModel):
@@ -26,5 +36,6 @@ class ApplicationDetail(BaseModel):
     documents_confirmed: bool   # Whether the user confirmed their documents
     user_email: str      # Pulled from the User table via JOIN
     attachments: list[AttachmentOut]  # List of uploaded documents
+    reviewers: list[ReviewerShort]
 
     model_config = ConfigDict(from_attributes=True)

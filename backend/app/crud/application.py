@@ -2,16 +2,25 @@ from sqlalchemy.orm import Session
 
 from ..models.application import Application
 from ..models.call import Call
-
+from ..crud.attachment import get_attachments_by_application, attachments_confirmed
+from sqlalchemy.orm import joinedload
+from app.models import Application, User
+from app.schemas.application import ApplicationDetail, ReviewerShort
+from app.models.application_reviewer import ApplicationReviewer
 
 
 def create_application(db: Session, call_id: int, content: str, user_id: int) -> Application:
-    # Check if the call exists and is open
-    call = db.query(Call).filter(Call.id == call_id).first()
-    if not call or not call.is_open:
-        raise ValueError("Call not available")
-    
-    # Create and store the application
+    # 1) Çağrı var mı ve açık mı?
+    call = db.query(Call).filter(Call.id == call_id, Call.is_open == True).first()
+    if not call:
+        raise ValueError("Call not found or not open")
+
+    # 2) Kullanıcı daha önce başvurmuş mu?
+    existing = db.query(Application).filter_by(user_id=user_id, call_id=call_id).first()
+    if existing:
+        raise ValueError("You have already applied to this call")
+
+    # 3) Yeni başvuru
     application = Application(user_id=user_id, call_id=call_id, content=content)
     db.add(application)
     db.commit()
@@ -39,19 +48,53 @@ def confirm_documents(db: Session, application: Application) -> Application:
     return application
 
 
-def get_applications_by_call(db: Session, call_id: int) -> list[Application]:
-    """Return all applications submitted for the given call."""
-    return db.query(Application).filter(Application.call_id == call_id).all()
+def get_applications_by_call(db: Session, call_id: int) -> list[ApplicationDetail]:
+    applications = db.query(Application).options(
+        joinedload(Application.review_assignments).joinedload(ApplicationReviewer.user)
+    ).filter(Application.call_id == call_id).all()
+    result = []
+    for app in applications:
+        detail = ApplicationDetail(
+            id=app.id,
+            user_id=app.user_id,
+            call_id=app.call_id,
+            content=app.content,
+            documents_confirmed=attachments_confirmed(db, app.id),
+            user_email=app.user.email if app.user else "",
+            attachments=get_attachments_by_application(db, app.id),
+            reviewers=[ReviewerShort(id=r.user.id, name=f"{r.user.first_name} {r.user.last_name}") for r in getattr(app, "review_assignments", [])]  # Opsiyonel: review_assignments ilişkisi varsa
+        )
+        result.append(detail)
+    return result
 
 
 def assign_reviewer(db: Session, application_id: int, reviewer_id: int) -> Application:
-    """Assign a reviewer to an application."""
+    """Assign a reviewer to an application with many-to-many support."""
     application = db.query(Application).filter(Application.id == application_id).first()
     if not application:
         raise ValueError("Application not found")
-    
-    application.reviewer_id = reviewer_id
-    db.add(application)
-    db.commit()
+
+    # Duplicate kontrolü
+    existing = db.query(ApplicationReviewer).filter_by(
+        application_id=application_id, user_id=reviewer_id
+    ).first()
+
+    if not existing:
+        assignment = ApplicationReviewer(application_id=application_id, user_id=reviewer_id)
+        db.add(assignment)
+        db.commit()
+        
     db.refresh(application)
+    return application
+
+def get_applications_by_user(db: Session, user_id: int) -> list[Application]:
+    """Return all applications for a given user."""
+    return db.query(Application).filter(Application.user_id == user_id).all()
+
+def delete_application_by_id(db: Session, application_id: int):
+    application = db.query(Application).filter(Application.id == application_id).first()
+    if not application:
+        return None
+    db.delete(application)
+    db.commit()
     return application

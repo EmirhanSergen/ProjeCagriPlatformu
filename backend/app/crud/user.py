@@ -14,12 +14,14 @@ def get_user_by_email(db: Session, email: str):
     return db.query(User).filter(User.email == email).first()
 
 def create_user(db: Session, user_in: UserCreate) -> User:
+    if get_user_by_email(db, user_in.email):
+        raise HTTPException(status_code=400, detail="Email already registered")
+
     hashed_password = pwd_context.hash(user_in.password)
     verification_token = secrets.token_urlsafe(32)
-    
-    # Auto-verify users in development
+
     is_verified = settings.environment == "development"
-    
+
     user = User(
         email=user_in.email,
         hashed_password=hashed_password,

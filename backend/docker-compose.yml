@@ -1,6 +1,9 @@
+version: '3.9'
+
 services:
   api:
     build: .
+    container_name: fastapi_app
     ports:
       - '8000:8000'
     env_file:
@@ -8,7 +11,14 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    volumes:
+      - .:/app  # Geliştirme sırasında kodu senkronize etmek için
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/docs"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     deploy:
       resources:
         limits:
@@ -18,14 +28,20 @@ services:
 
   db:
     image: postgres:15
+    container_name: postgres_db
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
       POSTGRES_DB: app_db
     ports:
       - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U user -d app_db"]
       interval: 10s
       timeout: 5s
       retries: 10
+
+volumes:
+  pgdata:

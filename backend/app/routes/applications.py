@@ -1,178 +1,304 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Path, Query, status,Response
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query, Path, status, Response
 from sqlalchemy.orm import Session
 from typing import List
 from pathlib import Path as Pathlib
-import os
-import shutil
+import os, shutil, uuid
 
 from app.dependencies import get_db
 from ..dependencies import get_current_user, get_current_admin, get_current_admin_or_reviewer
-from ..models.user import User
+from ..models.application import Application, ApplicationStatus
+from ..models.document import DocumentDefinition
 from ..models.attachment import Attachment
-from ..models.application import Application
 from ..schemas.application import ApplicationCreate, ApplicationOut, ApplicationDetail
 from ..schemas.attachment import AttachmentOut
+from app.config import settings
 from ..crud.application import (
     create_application,
     get_application_by_user_and_call,
     get_applications_by_call,
+    get_applications_by_user,
+    delete_application_by_id,
+    assign_reviewer,
 )
 from ..crud.attachment import (
     create_attachment,
+    get_attachments_by_application,
     confirm_attachments,
     confirm_attachment,
     attachments_confirmed,
-    get_attachments_by_application,
     delete_attachment,
 )
-from ..crud.application import assign_reviewer
 
 router = APIRouter(prefix="/applications", tags=["applications"])
 
-# Endpoint: Submit a new application
+# Submit a new application
 @router.post("/", response_model=ApplicationOut, status_code=status.HTTP_201_CREATED)
 def submit_application(
     app_in: ApplicationCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user = Depends(get_current_user),
 ):
+    if not app_in.content.strip():
+        raise HTTPException(status_code=400, detail="Application content is required")
     try:
-        application = create_application(
-            db, app_in.call_id, app_in.content, current_user.id
-        )
+        return create_application(db, call_id=app_in.call_id, content=app_in.content, user_id=current_user.id)
     except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
+        raise HTTPException(status_code=400, detail=str(exc))
+
+# Read current user's application for a call
+@router.get("/{application_id}", response_model=ApplicationOut)
+def read_application(
+    application_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user),
+):
+    application = get_application_by_user_and_call(db, current_user.id, application_id)
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
     return application
 
-# Endpoint: Upload multiple files for an application
+# Multi-file upload for an application (legacy)
 @router.post("/{call_id}/upload", response_model=List[AttachmentOut])
 def upload_application_files(
     call_id: int = Path(..., description="The call ID for the application"),
-    document_id: int | None = Query(None, description="Optional document definition ID"),
+    document_id: int = Query(..., description="Document definition ID"),
     files: List[UploadFile] = File(..., description="Upload one or more files"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user = Depends(get_current_user),
 ):
     application = get_application_by_user_and_call(db, current_user.id, call_id)
     if not application:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Application not found")
+        raise HTTPException(status_code=404, detail="Application not found")
     if attachments_confirmed(db, application.id):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Attachments already confirmed")
+        raise HTTPException(status_code=400, detail="Attachments already confirmed")
 
-    upload_dir = Pathlib("uploads")
-    upload_dir.mkdir(exist_ok=True)
+    upload_dir = Pathlib(settings.upload_dir) / str(application.id)
+    upload_dir.mkdir(parents=True, exist_ok=True)
 
     attachments: List[Attachment] = []
     for file in files:
         filename = os.path.basename(file.filename)
-        # Ensure filename is secure
         if Pathlib(filename).is_absolute() or ".." in filename:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid filename")
-        target = upload_dir / filename
+            raise HTTPException(status_code=400, detail="Invalid filename")
+
+        ext = filename.rsplit(".", 1)[-1].lower()
+        document = (
+            db.query(DocumentDefinition)
+              .filter_by(id=document_id, call_id=application.call_id)
+              .first()
+        )
+        if not document:
+            raise HTTPException(status_code=400, detail="Invalid document ID for this call")
+        if ext not in document.allowed_formats.split(","):
+            raise HTTPException(status_code=400, detail=f"Invalid file format: .{ext}")
+
+        unique_name = f"{uuid.uuid4().hex}_{filename}"
+        target = upload_dir / unique_name
         with target.open("wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
-        att = create_attachment(db, application.id, str(target), document_id)
-        attachments.append(att)
+
+        # Burada create_attachment yerine manuel ekleme yapıyoruz:
+        attachment = Attachment(
+            application_id=application.id,
+            document_id=document_id,
+            file_path=str(target),
+            is_confirmed=False,
+        )
+        db.add(attachment)
+        db.commit()
+        db.refresh(attachment)
+
+        attachments.append(attachment)
+
     return attachments
 
-# Endpoint: Confirm all uploaded files
-@router.post("/{call_id}/confirm", status_code=status.HTTP_200_OK)
-def confirm_application_files(
-    call_id: int,
+
+# Single file upload endpoint
+@router.post("/{application_id}/attachments", response_model=AttachmentOut)
+def upload_attachment(
+    application_id: int = Path(..., description="The application ID"),
+    document_id: int = Query(..., description="Document definition ID"),
+    file: UploadFile = File(...),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user = Depends(get_current_user),
 ):
-    application = get_application_by_user_and_call(db, current_user.id, call_id)
+    application = get_application_by_user_and_call(db, current_user.id, application_id)
     if not application:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Application not found")
-    attachments = get_attachments_by_application(db, application.id)
-    if not attachments:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No attachments to confirm")
+        raise HTTPException(status_code=404, detail="Application not found")
     if attachments_confirmed(db, application.id):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Attachments already confirmed")
-    confirm_attachments(db, application.id)
-    return {"detail": "Attachments confirmed"}
+        raise HTTPException(status_code=400, detail="Attachments already confirmed")
 
-# Endpoint: Confirm a single attachment
-@router.patch("/{call_id}/attachments/{attachment_id}/confirm", status_code=status.HTTP_200_OK)
-def confirm_single_attachment(
-    call_id: int,
+    document = db.query(DocumentDefinition).filter_by(id=document_id, call_id=application.call_id).first()
+    if not document:
+        raise HTTPException(status_code=400, detail="Invalid document ID for this call")
+
+    ext = file.filename.rsplit('.', 1)[-1].lower()
+    if ext not in document.allowed_formats.split(','):
+        raise HTTPException(status_code=400, detail=f"Invalid file format: .{ext}")
+
+    upload_dir = os.path.join(settings.upload_dir, str(application.id))
+    os.makedirs(upload_dir, exist_ok=True)
+    filename = f"{uuid.uuid4().hex}.{ext}"
+    file_path = os.path.join(upload_dir, filename)
+    with open(file_path, "wb") as f:
+        shutil.copyfileobj(file.file, f)
+
+    attachment = Attachment(application_id=application.id, document_id=document.id, file_path=file_path, is_confirmed=False)
+    db.add(attachment)
+    db.commit()
+    db.refresh(attachment)
+    return attachment
+
+# List attachments for an application
+@router.get("/{application_id}/attachments", response_model=List[AttachmentOut])
+def list_attachments(
+    application_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user),
+):
+    application = get_application_by_user_and_call(db, current_user.id, application_id)
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+    return get_attachments_by_application(db, application.id)
+
+# Delete an attachment by its ID
+@router.delete("/attachments/{attachment_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_attachment_route(
     attachment_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user = Depends(get_current_user),
 ):
-    application = get_application_by_user_and_call(db, current_user.id, call_id)
-    if not application:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Application not found")
-    attachment = (
-        db.query(Attachment)
-        .filter(Attachment.id == attachment_id, Attachment.application_id == application.id)
-        .first()
-    )
+    attachment = db.query(Attachment).join(Application).filter(
+        Attachment.id == attachment_id,
+        Application.user_id == current_user.id
+    ).first()
     if not attachment:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Attachment not found")
-    confirm_attachment(db, attachment.id)
-    return {"detail": "Attachment confirmed"}
-
-# Endpoint: Delete a single attachment
-@router.delete("/{call_id}/attachments/{attachment_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_single_attachment(
-    call_id: int,
-    attachment_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    application = get_application_by_user_and_call(db, current_user.id, call_id)
-    if not application:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Application not found")
+        raise HTTPException(status_code=404, detail="Attachment not found")
+    try:
+        os.remove(attachment.file_path)
+    except OSError:
+        pass
     delete_attachment(db, attachment_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-# Endpoint: Read current user's application
-@router.get("/{call_id}", response_model=ApplicationOut)
-def read_application(
+# Confirm all uploaded files
+@router.post("/{application_id}/confirm", status_code=status.HTTP_200_OK)
+def confirm_application_files(
+    application_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user),
+):
+    application = get_application_by_user_and_call(db, current_user.id, application_id)
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+    if not get_attachments_by_application(db, application.id):
+        raise HTTPException(status_code=400, detail="No attachments to confirm")
+    if attachments_confirmed(db, application.id):
+        raise HTTPException(status_code=400, detail="Attachments already confirmed")
+    confirm_attachments(db, application.id)
+    return {"detail": "Attachments confirmed"}
+
+# Confirm a single attachment
+@router.patch("/{application_id}/attachments/{attachment_id}/confirm", status_code=status.HTTP_200_OK)
+def confirm_single_attachment(
+    application_id: int,
+    attachment_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user),
+):
+    application = get_application_by_user_and_call(db, current_user.id, application_id)
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+    attachment = db.query(Attachment).filter(
+        Attachment.id == attachment_id,
+        Attachment.application_id == application.id
+    ).first()
+    if not attachment:
+        raise HTTPException(status_code=404, detail="Attachment not found")
+    confirm_attachment(db, attachment.id)
+    return {"detail": "Attachment confirmed"}
+
+# Submit application status
+@router.patch("/{application_id}/submit", response_model=ApplicationOut)
+def submit_application_status(
+    application_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user),
+):
+    app_obj = db.query(Application).filter(
+        Application.id == application_id,
+        Application.user_id == current_user.id
+    ).first()
+    if not app_obj:
+        raise HTTPException(status_code=404, detail="Application not found")
+    app_obj.status = ApplicationStatus.SUBMITTED
+    db.commit()
+    db.refresh(app_obj)
+    return app_obj
+
+# Delete draft application
+@router.delete("/{application_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_draft_application(
+    application_id: int,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user),
+):
+    application = db.query(Application).filter(
+        Application.id == application_id,
+        Application.user_id == current_user.id
+    ).first()
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+    if application.status != ApplicationStatus.DRAFT:
+        raise HTTPException(status_code=400, detail="Only DRAFT applications can be deleted")
+    delete_application_by_id(db, application.id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+# List my applications
+@router.get("/me", response_model=List[ApplicationOut], summary="List my applications")
+def list_my_applications(
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user),
+):
+    return get_applications_by_user(db, current_user.id)
+
+# Get or create application by call
+@router.get("/by_call/{call_id}", response_model=ApplicationOut)
+def get_or_create_application_by_call(
     call_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user = Depends(get_current_user),
 ):
-    application = get_application_by_user_and_call(db, current_user.id, call_id)
-    if not application:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Application not found")
-    return application
+    existing = get_application_by_user_and_call(db, current_user.id, call_id)
+    if existing:
+        return existing
+    try:
+        return create_application(db, call_id=call_id, content="", user_id=current_user.id)
+    except ValueError:
+        existing = get_application_by_user_and_call(db, current_user.id, call_id)
+        if existing:
+            return existing
+        raise HTTPException(status_code=400, detail="Could not create or fetch application")
 
-# Endpoint: List current user's attachments
-@router.get("/{call_id}/attachments", response_model=List[AttachmentOut])
-def list_application_attachments(
-    call_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    application = get_application_by_user_and_call(db, current_user.id, call_id)
-    if not application:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Application not found")
-    return get_attachments_by_application(db, application.id)
-
-# Admin endpoint: List all applications for a call
+# Admin: List all applications for a call
 @router.get("/admin/{call_id}/applications", response_model=List[ApplicationDetail])
 async def admin_list_call_applications(
     call_id: int,
     db: Session = Depends(get_db),
-    current_admin: User = Depends(get_current_admin),
+    current_admin = Depends(get_current_admin),
 ):
-    applications = get_applications_by_call(db, call_id)
-    return applications
+    return get_applications_by_call(db, call_id)
 
-# Admin endpoint: Assign a reviewer to an application
+# Admin: Assign reviewer to an application
 @router.post("/admin/applications/{application_id}/assign-reviewer", status_code=status.HTTP_200_OK)
-async def assign_reviewer_to_application(
-    application_id: int = Path(..., description="ID of the application"),
-    reviewer_id: int = Query(..., description="ID of the reviewer to assign"),
+async def assign_reviewer_route(
+    application_id: int = Path(...),
+    reviewer_id: int = Query(...),
     db: Session = Depends(get_db),
-    current_admin: User = Depends(get_current_admin),
+    current_admin = Depends(get_current_admin),
 ):
-    """(Admin) Assign a reviewer to an application."""
     try:
         assign_reviewer(db, application_id, reviewer_id)
     except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
-    return {"detail": f"Reviewer {reviewer_id} assigned to application {application_id}"}
+        raise HTTPException(status_code=400, detail=str(exc))
+    return {"detail": f"Reviewer {reviewer_id} assigned", "application_id": application_id}

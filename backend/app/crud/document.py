@@ -14,7 +14,7 @@ def create_document_definition(
     doc = DocumentDefinition(
         call_id=call_id,
         name=name,
-        allowed_formats=allowed_formats.value,
+        allowed_formats=allowed_formats,
         description=description,
     )
     db.add(doc)
@@ -23,20 +23,10 @@ def create_document_definition(
     return doc
 
 
-def update_document_definition(
-    db: Session,
-    doc: DocumentDefinition,
-    name: str | None = None,
-    allowed_formats: DocumentFormat | None = None,
-    description: str | None = None,
-) -> DocumentDefinition:
-    if name is not None:
-        doc.name = name
-    if allowed_formats is not None:
-        doc.allowed_formats = allowed_formats.value
-    if description is not None:
-        doc.description = description
-    db.add(doc)
+def update_document_definition(db: Session, doc: DocumentDefinition, doc_update: dict) -> DocumentDefinition:
+    data = doc_update.model_dump(exclude_unset=True)
+    for key, value in data.items():
+        setattr(doc, key, value)
     db.commit()
     db.refresh(doc)
     return doc

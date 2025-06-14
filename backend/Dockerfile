@@ -16,9 +16,6 @@ RUN apt-get update \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
 
-# Include migrations so Alembic can run inside the container
-COPY alembic.ini ./
-COPY migrations ./migrations
 
 COPY app ./app
 COPY ./start.sh /app/start.sh

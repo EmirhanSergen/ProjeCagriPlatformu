@@ -18,6 +18,7 @@ class FileUploadService:
         'image': {'image/jpeg', 'image/png', 'image/gif'},
         'text': {'text/plain'}
     }
+
     MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB limit
     UPLOAD_DIR = Path("uploads")
 
@@ -45,14 +46,14 @@ class FileUploadService:
         """
         Save uploaded file with security checks and return relative path.
         """
-        # Check file size
-        file.file.seek(0, 2)
-        size = file.file.tell()
-        file.file.seek(0)
+        # Check file size (seek(0, 2) = move to end of file, tell() = current pos)
+        await file.seek(0, os.SEEK_END)
+        size = await file.tell()
+        await file.seek(0)
         if size > self.MAX_FILE_SIZE:
             raise HTTPException(status_code=400, detail="File too large")
 
-        # Prepare safe path
+        # Prepare destination path
         safe_name = self._get_safe_filename(file.filename)
         date_dir = datetime.now().strftime("%Y-%m-%d")
         dest_dir = self.UPLOAD_DIR / date_dir
@@ -65,8 +66,9 @@ class FileUploadService:
                 await out.write(chunk)
 
         # Validate mime type
-        if not self._validate_file_type(str(dest_path), allowed_formats):
+        if allowed_formats and not self._validate_file_type(str(dest_path), allowed_formats):
             os.unlink(dest_path)
             raise HTTPException(status_code=400, detail="Invalid file type")
 
-        return str(dest_path.relative_to(self.UPLOAD_DIR))
+        # Return relative path like: /uploads/2025-06-14/file.pdf
+        return f"/{self.UPLOAD_DIR.name}/{date_dir}/{safe_name}"

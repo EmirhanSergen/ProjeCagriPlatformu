@@ -8,12 +8,19 @@ import { Link } from 'react-router-dom'
 
 // Validation schema
 const schema = z.object({
-  email:    z.string().email('Invalid email address'),
+  email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
-  role:     z.enum(['applicant', 'reviewer', 'admin']),
+  role: z.enum(['applicant', 'reviewer', 'admin']),
+  firstName: z.string().min(1, 'First name is required'),
+  lastName: z.string().min(1, 'Last name is required'),
+  organization: z.string().min(1, 'Organization is required'),
 })
 
-interface Props { onSuccess?: () => void }
+
+interface Props {
+  onSuccess?: () => void
+}
+
 export default function RegisterForm({ onSuccess }: Props) {
   const { register, handleSubmit, formState: { errors, isSubmitting } } =
     useForm<RegisterData>({ resolver: zodResolver(schema) })
@@ -33,60 +40,88 @@ export default function RegisterForm({ onSuccess }: Props) {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Email */}
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-          Email
-        </label>
+        <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
         <input
           id="email"
           type="email"
           {...register('email')}
           disabled={isSubmitting}
-          placeholder="you@example.com"
-          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm px-4 py-3 h-12 focus:ring-blue-500 focus:border-blue-500"
+          className="mt-1 block w-full border rounded px-4 py-3"
         />
-        {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
+        {errors.email && <p className="text-sm text-red-600">{errors.email.message}</p>}
       </div>
 
       {/* Password */}
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-          Password
-        </label>
+        <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
         <input
           id="password"
           type="password"
           {...register('password')}
           disabled={isSubmitting}
-          placeholder="Minimum 6 characters"
-          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm px-4 py-3 h-12 focus:ring-blue-500 focus:border-blue-500"
+          className="mt-1 block w-full border rounded px-4 py-3"
         />
-        {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>}
+        {errors.password && <p className="text-sm text-red-600">{errors.password.message}</p>}
+      </div>
+
+      {/* First Name */}
+      <div>
+        <label htmlFor="first_name" className="block text-sm font-medium text-gray-700">First Name</label>
+        <input
+          id="first_name"
+          {...register('firstName')}
+          disabled={isSubmitting}
+          className="mt-1 block w-full border rounded px-4 py-3"
+        />
+        {errors.firstName && <p className="text-sm text-red-600">{errors.firstName.message}</p>}
+      </div>
+
+      {/* Last Name */}
+      <div>
+        <label htmlFor="last_name" className="block text-sm font-medium text-gray-700">Last Name</label>
+        <input
+          id="last_name"
+          {...register('lastName')}
+          disabled={isSubmitting}
+          className="mt-1 block w-full border rounded px-4 py-3"
+        />
+        {errors.lastName && <p className="text-sm text-red-600">{errors.lastName.message}</p>}
+      </div>
+
+      {/* Organization */}
+      <div>
+        <label htmlFor="organization" className="block text-sm font-medium text-gray-700">Organization</label>
+        <input
+          id="organization"
+          {...register('organization')}
+          disabled={isSubmitting}
+          className="mt-1 block w-full border rounded px-4 py-3"
+        />
+        {errors.organization && <p className="text-sm text-red-600">{errors.organization.message}</p>}
       </div>
 
       {/* Role */}
       <div>
-        <label htmlFor="role" className="block text-sm font-medium text-gray-700">
-          Role
-        </label>
+        <label htmlFor="role" className="block text-sm font-medium text-gray-700">Role</label>
         <select
           id="role"
           {...register('role')}
           disabled={isSubmitting}
-          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm px-4 py-3 h-12 focus:ring-blue-500 focus:border-blue-500"
+          className="mt-1 block w-full border rounded px-4 py-3"
         >
           <option value="">Select role</option>
           <option value="applicant">Applicant</option>
           <option value="reviewer">Reviewer</option>
           <option value="admin">Administrator</option>
         </select>
-        {errors.role && <p className="mt-1 text-sm text-red-600">{errors.role.message}</p>}
+        {errors.role && <p className="text-sm text-red-600">{errors.role.message}</p>}
       </div>
 
       {/* Submit */}
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full py-3 px-4 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 disabled:opacity-50"
+        className="w-full py-3 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
       >
         {isSubmitting ? 'Registering…' : 'Register'}
       </button>

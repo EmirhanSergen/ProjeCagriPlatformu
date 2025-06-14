@@ -8,6 +8,8 @@ from .call import Call  # noqa: F401
 from .application import Application  # noqa: F401
 from .attachment import Attachment  # noqa: F401
 from .document import DocumentDefinition  # noqa: F401
+from .application_reviewer import ApplicationReviewer  # noqa: F401
+from .review import Review
 
 __all__ = [
     "Base",
@@ -16,4 +18,6 @@ __all__ = [
     "Application",
     "Attachment",
     "DocumentDefinition",
+    "ApplicationReviewer",
+    "Review",
 ]

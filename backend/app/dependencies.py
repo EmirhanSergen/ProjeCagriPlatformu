@@ -8,7 +8,8 @@ from .models.user import User, UserRole
 from .database import SessionLocal
 from .config import settings
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")  # Login path
+# Corrected tokenUrl based on actual login endpoint
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 def get_db():
     """Provide a database session to path operations."""
@@ -24,13 +25,18 @@ async def get_current_user(
 ) -> User:
     """Return the authenticated user based on the JWT token."""
     try:
-        payload = jwt.decode(token, settings.jwt_secret.get_secret_value(), algorithms=[settings.jwt_algorithm])
+        payload = jwt.decode(
+            token,
+            settings.jwt_secret.get_secret_value(),
+            algorithms=[settings.jwt_algorithm]
+        )
         user_id = int(payload.get("sub"))
     except (JWTError, TypeError, ValueError):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
         )
+
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(
@@ -41,7 +47,7 @@ async def get_current_user(
 
 async def get_current_admin(current_user: User = Depends(get_current_user)) -> User:
     """Ensure the current user has admin privileges."""
-    if current_user.role != UserRole.ADMIN:
+    if current_user.role is not UserRole.ADMIN:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not enough privileges",

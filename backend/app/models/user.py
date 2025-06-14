@@ -2,6 +2,7 @@ from enum import Enum as PyEnum
 
 from sqlalchemy import Column, Integer, String, Enum, Boolean, DateTime, func
 from datetime import datetime, timedelta
+from sqlalchemy.orm import relationship
 
 from ..database import Base
 
@@ -43,3 +44,4 @@ class User(Base):
     # Timestamps
     created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
     updated_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
+    assigned_reviews = relationship("ApplicationReviewer", back_populates="user", cascade="all, delete-orphan")

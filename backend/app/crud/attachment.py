@@ -4,9 +4,8 @@ from ..models.attachment import Attachment
 from ..schemas.attachment import AttachmentCreate
 
 
-def create_attachment(db: Session, application_id: int, file_path: str, document_id: int | None = None) -> Attachment:
-    # Create and store a file attachment
-    attachment = Attachment(application_id=application_id, file_path=file_path, document_id=document_id)
+def create_attachment(db: Session, attachment_in: AttachmentCreate) -> Attachment:
+    attachment = Attachment(**attachment_in.model_dump())
     db.add(attachment)
     db.commit()
     db.refresh(attachment)

@@ -34,3 +34,4 @@ class Application(Base):
     user = relationship("User", backref="applications")
     call = relationship("Call", backref="applications")
     attachments = relationship("Attachment", backref="application", cascade="all, delete-orphan")
+    review_assignments = relationship("ApplicationReviewer", back_populates="application", cascade="all, delete-orphan")
