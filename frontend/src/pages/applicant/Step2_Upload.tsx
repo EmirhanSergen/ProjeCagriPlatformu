@@ -15,6 +15,7 @@ import {
 import { useToast } from '../../components/ToastProvider'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
+import ConfirmModal from '../../components/ui/ConfirmModal'
 
 export default function Step2_Upload() {
   const { callId } = useParams<{ callId: string }>()
@@ -25,6 +26,8 @@ export default function Step2_Upload() {
   const [documents, setDocuments] = useState<DocumentDefinition[]>([])
   const [selectedDocId, setSelectedDocId] = useState<number | null>(null)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [pendingAttachment, setPendingAttachment] = useState<Attachment | null>(null)
   const { showToast } = useToast()
   const init = useRef(false)
 
@@ -60,23 +63,8 @@ export default function Step2_Upload() {
     setSelectedFiles([])
   }, [selectedDocId])
 
-  const handleUpload = async () => {
+  const performUpload = async () => {
     if (!application?.id || !selectedDocId || !selectedFiles.length) return
-
-    const existing = attachments.find(a => a.document_id === selectedDocId)
-    if (existing) {
-      const confirmed = window.confirm(
-        'This document already has a file. Uploading again will replace the existing one. Continue?'
-      )
-      if (!confirmed) return
-      try {
-        await deleteAttachment(existing.id)
-        setAttachments(prev => prev.filter(a => a.id !== existing.id))
-      } catch (e) {
-        showToast('Failed to remove old file', 'error')
-        return
-      }
-    }
 
     try {
       const newAtts = await uploadDocuments(
@@ -101,8 +89,53 @@ export default function Step2_Upload() {
     }
   }
 
+  const handleUpload = async () => {
+    if (!application?.id || !selectedDocId || !selectedFiles.length) return
+
+    const existing = attachments.find(a => a.document_id === selectedDocId)
+    if (existing) {
+      setPendingAttachment(existing)
+      setConfirmOpen(true)
+      return
+    }
+
+    await performUpload()
+  }
+
+  const confirmReplace = async () => {
+    if (!pendingAttachment) return
+    try {
+      await deleteAttachment(pendingAttachment.id)
+      setAttachments(prev => prev.filter(a => a.id !== pendingAttachment.id))
+    } catch (e) {
+      showToast('Failed to remove old file', 'error')
+      setConfirmOpen(false)
+      setPendingAttachment(null)
+      return
+    }
+    setConfirmOpen(false)
+    setPendingAttachment(null)
+    await performUpload()
+  }
+
+  const closeModal = () => {
+    setConfirmOpen(false)
+    setPendingAttachment(null)
+  }
+
   return (
-    <div className="flex">
+    <>
+      <ConfirmModal
+        open={confirmOpen}
+        onClose={closeModal}
+        onConfirm={confirmReplace}
+        title="Confirm Replacement"
+        description="This document already has a file. Uploading again will replace the existing one. Continue?"
+        confirmLabel="Replace"
+        cancelLabel="Cancel"
+        danger
+      />
+      <div className="flex">
       <aside className="w-60 border-r p-4 bg-gray-50 space-y-2">
         {documents.map(doc => (
           <button
@@ -155,5 +188,6 @@ export default function Step2_Upload() {
         )}
       </main>
     </div>
+    </>
   )
 }
