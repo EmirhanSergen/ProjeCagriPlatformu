@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { fetchApplications, type ApplicationDetail, downloadAttachment } from '../api';
 import { useToast } from './ToastProvider';
+import { downloadBlob } from '../lib/download';
 
 interface Props {
   callId: number;
@@ -64,8 +65,7 @@ export default function ApplicationList({ callId }: Props) {
                         onClick={async () => {
                           try {
                             const blob = await downloadAttachment(att.id)
-                            const url = URL.createObjectURL(blob)
-                            window.open(url, '_blank')
+                            downloadBlob(blob, att.file_name)
                           } catch {
                             showToast('Failed to download file', 'error')
                           }

@@ -17,6 +17,7 @@ import { useToast } from '../../components/ToastProvider'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import ConfirmModal from '../../components/ui/ConfirmModal'
+import { downloadBlob } from '../../lib/download'
 
 export default function Step2_Upload() {
   const { callId } = useParams<{ callId: string }>()
@@ -179,8 +180,7 @@ export default function Step2_Upload() {
                       onClick={async () => {
                         try {
                           const blob = await downloadAttachment(a.id)
-                          const url = URL.createObjectURL(blob)
-                          window.open(url, '_blank')
+                          downloadBlob(blob, a.file_name)
                         } catch {
                           showToast('Failed to download file', 'error')
                         }
