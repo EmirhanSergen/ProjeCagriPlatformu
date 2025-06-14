@@ -128,6 +128,7 @@ export default function Step2_Upload() {
               {documents.find(d => d.id === selectedDocId)?.description}
             </p>
             <Input
+              key={selectedDocId}
               type="file"
               onChange={e => setSelectedFiles(Array.from(e.target.files || []))}
             />
