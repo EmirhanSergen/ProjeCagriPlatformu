@@ -12,6 +12,7 @@ import {
 } from '../../api'
 import { Button } from '../../components/ui/Button'
 import { useToast } from '../../components/ToastProvider'
+import { downloadBlob } from '../../lib/download'
 
 export default function Step3_Review() {
   const { callId } = useParams<{ callId: string }>()
@@ -73,8 +74,7 @@ export default function Step3_Review() {
                       onClick={async () => {
                         try {
                           const blob = await downloadAttachment(file.id)
-                          const url = URL.createObjectURL(blob)
-                          window.open(url, '_blank')
+                          downloadBlob(blob, file.file_name)
                         } catch {
                           showToast('Failed to download file', 'error')
                         }

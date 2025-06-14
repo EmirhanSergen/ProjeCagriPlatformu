@@ -1,5 +1,6 @@
 import type { Attachment } from '../api'
 import { downloadAttachment } from '../api'
+import { downloadBlob } from '../lib/download'
 
 
 interface Props {
@@ -15,8 +16,7 @@ export default function AttachmentList({ attachments }: Props) {
             onClick={async () => {
               try {
                 const blob = await downloadAttachment(a.id)
-                const url = URL.createObjectURL(blob)
-                window.open(url, '_blank')
+                downloadBlob(blob, a.file_name)
               } catch {
                 // AttachmentList has no toast context by default; swallow errors
               }

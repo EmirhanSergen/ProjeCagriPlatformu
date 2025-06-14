@@ -2,6 +2,7 @@ import { useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { fetchApplicationDetails, downloadAttachment } from '../../api'
 import type { ApplicationDetail, Attachment } from '../../api'
+import { downloadBlob } from '../../lib/download'
 import { useToast } from '../../components/ToastProvider'
 import { useAuth } from '../../context/AuthContext' // yolu senin yapına göre `components/AuthProvider` da olabilir
 
@@ -41,8 +42,7 @@ export default function ApplicationDetailPage() {
                   onClick={async () => {
                     try {
                       const blob = await downloadAttachment(doc.id)
-                      const url = URL.createObjectURL(blob)
-                      window.open(url, '_blank')
+                      downloadBlob(blob, doc.file_name)
                     } catch {
                       showToast('Failed to download file', 'error')
                     }
