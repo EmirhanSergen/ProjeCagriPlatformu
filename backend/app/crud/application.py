@@ -39,6 +39,17 @@ def get_application_by_user_and_call(
     )
 
 
+def get_application_for_user(
+    db: Session, application_id: int, user_id: int
+) -> Application | None:
+    """Return application by id belonging to the given user."""
+    return (
+        db.query(Application)
+        .filter(Application.id == application_id, Application.user_id == user_id)
+        .first()
+    )
+
+
 def confirm_documents(db: Session, application: Application) -> Application:
     """Mark documents for an application as confirmed."""
     application.documents_confirmed = True
