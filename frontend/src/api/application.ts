@@ -186,7 +186,7 @@ export async function assignReviewer(applicationId: number, reviewerId: number):
 
 // 11. Hakem listesini getir (admin için)
 export async function fetchReviewers(): Promise<User[]> {
-  const res = await fetch(`${API_BASE}/admin/reviewers`, {
+  const res = await fetch(`${API_BASE}/users/admin/reviewers`, {
     headers: authHeaders(),
   })
   if (!res.ok) throw new Error('Failed to fetch reviewers')
