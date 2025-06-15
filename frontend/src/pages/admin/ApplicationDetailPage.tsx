@@ -1,6 +1,11 @@
 import { useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { fetchApplicationDetails, downloadAttachment, fetchCall } from '../../api'
+import {
+  fetchApplicationDetails,
+  downloadAttachment,
+  downloadAttachmentForReview,
+  fetchCall,
+} from '../../api'
 import type { ApplicationDetail, Attachment, Call } from '../../api'
 import { downloadBlob } from '../../lib/download'
 import { useToast } from '../../components/ToastProvider'
@@ -101,15 +106,18 @@ export default function ApplicationDetailPage() {
                   <FileIcon className="w-5 h-5 text-gray-500" />
                   <span className="truncate">{getReadableFileName(doc.file_name)}</span>
                 </div>
-                <button
-                  onClick={async () => {
-                    try {
-                      const blob = await downloadAttachment(doc.id)
-                      downloadBlob(blob, doc.file_name)
-                    } catch {
-                      showToast('Failed to download file', 'error')
-                    }
-                  }}
+                  <button
+                    onClick={async () => {
+                      try {
+                        const blob =
+                          user?.role === 'admin' || user?.role === 'reviewer'
+                            ? await downloadAttachmentForReview(doc.id)
+                            : await downloadAttachment(doc.id)
+                        downloadBlob(blob, doc.file_name)
+                      } catch {
+                        showToast('Failed to download file', 'error')
+                      }
+                    }}
                   className="flex items-center gap-1 text-sm text-blue-600 hover:underline"
                 >
                   <DownloadIcon className="w-4 h-4" />
