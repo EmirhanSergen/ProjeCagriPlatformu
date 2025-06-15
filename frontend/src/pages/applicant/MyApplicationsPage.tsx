@@ -1,7 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { format } from 'date-fns'
-import { fetchMyApplications, fetchCall, type MyApplication, type Call } from '../../api'
+import {
+  fetchMyApplications,
+  fetchCall,
+  fetchAttachmentsByApplicationId,
+  type MyApplication,
+  type Call,
+  type Attachment,
+} from '../../api'
 import { useToast } from '../../components/ToastProvider'
 import {
   Table,
@@ -16,6 +23,8 @@ import { Badge } from '../../components/ui/Badge' // Badge bileşenini doğru ku
 
 interface MyAppWithCall extends MyApplication {
   callTitle?: string
+  callCategory?: string
+  attachmentsCount?: number
 }
 
 const statusColorMap: Record<string, string> = {
@@ -36,12 +45,23 @@ export default function MyApplicationsPage() {
         const appsWithCalls = await Promise.all(
           apps.map(async app => {
             let call: Call | null = null
+            let attachments: Attachment[] = []
             try {
               call = await fetchCall(app.call_id)
             } catch {
               // ignore error
             }
-            return { ...app, callTitle: call?.title }
+            try {
+              attachments = await fetchAttachmentsByApplicationId(app.id)
+            } catch {
+              // ignore error
+            }
+            return {
+              ...app,
+              callTitle: call?.title,
+              callCategory: call?.category,
+              attachmentsCount: attachments.length,
+            }
           })
         )
         setApplications(appsWithCalls)
@@ -73,9 +93,11 @@ export default function MyApplicationsPage() {
           <TableHeader>
             <TableRow className="text-gray-600 bg-gray-50">
               <TableHead className="py-3 px-4">Call</TableHead>
+              <TableHead>Category</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Created</TableHead>
               <TableHead>Updated</TableHead>
+              <TableHead>Files</TableHead>
               <TableHead className="text-right">Action</TableHead>
             </TableRow>
           </TableHeader>
@@ -83,6 +105,7 @@ export default function MyApplicationsPage() {
             {applications.map(app => (
               <TableRow key={app.id} className="hover:bg-gray-50 transition-all h-[60px]">
                 <TableCell className="font-medium">{app.callTitle ?? `Call #${app.call_id}`}</TableCell>
+                <TableCell>{app.callCategory ?? '-'}</TableCell>
                 <TableCell>
                   <Badge className={statusColorMap[app.status] || 'bg-gray-100 text-gray-800'}>
                     {app.status}
@@ -90,6 +113,7 @@ export default function MyApplicationsPage() {
                 </TableCell>
                 <TableCell>{format(new Date(app.created_at), 'yyyy-MM-dd')}</TableCell>
                 <TableCell>{app.updated_at ? format(new Date(app.updated_at), 'yyyy-MM-dd') : '-'}</TableCell>
+                <TableCell>{app.attachmentsCount ?? 0}</TableCell>
                 <TableCell className="text-right">
                   <Link
                     to={`/applicant/${app.call_id}/step1`}
