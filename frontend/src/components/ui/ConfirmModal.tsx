@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle
@@ -36,9 +37,11 @@ export function ConfirmModal({
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
-        <div className="py-2 text-sm text-muted-foreground">
-          {description}
-        </div>
+        {description && (
+          <DialogDescription className="py-2">
+            {description}
+          </DialogDescription>
+        )}
         <DialogFooter className="gap-2 justify-center">
           <Button variant="outline" onClick={onClose}>{cancelLabel}</Button>
           <Button
