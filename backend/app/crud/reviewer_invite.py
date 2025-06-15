@@ -6,6 +6,27 @@ from ..models.reviewer_invite import ReviewerInvite
 from ..models.call_reviewer import CallReviewer
 
 
+def create_invite(
+    db: Session,
+    *,
+    call_id: int,
+    email: str,
+    token: str,
+    expires_at: datetime,
+) -> ReviewerInvite:
+    """Create and persist a new reviewer invite."""
+    invite = ReviewerInvite(
+        call_id=call_id,
+        email=email,
+        token=token,
+        expires_at=expires_at,
+    )
+    db.add(invite)
+    db.commit()
+    db.refresh(invite)
+    return invite
+
+
 def get_invite_by_token(db: Session, token: str) -> ReviewerInvite | None:
     return db.query(ReviewerInvite).filter(ReviewerInvite.token == token).first()
 
