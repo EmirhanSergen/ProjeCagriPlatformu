@@ -11,6 +11,9 @@ export default function LoginPage() {
       <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg">
         <h1 className="text-2xl font-bold text-center mb-6">Welcome Back</h1>
         {role && (
+          <p className="text-center mb-4 capitalize text-gray-700">Role: {role}</p>
+        )}
+        {role && (
           <LoginForm
             role={role}
             onSuccess={() => navigate(role === 'admin' ? '/admin/calls' : '/calls')}
