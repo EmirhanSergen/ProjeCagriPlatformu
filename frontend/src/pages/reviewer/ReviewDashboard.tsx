@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { format } from 'date-fns'
 import { Link } from 'react-router-dom'
 import {
   fetchCalls,
@@ -101,8 +102,9 @@ export default function ReviewDashboard() {
           <TableHeader>
             <TableRow>
               <TableHead>Call</TableHead>
-              <TableHead>Applicant</TableHead>
-              <TableHead className="text-center">Documents</TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Submitted</TableHead>
               <TableHead className="text-center">Status</TableHead>
               <TableHead className="text-center">Action</TableHead>
             </TableRow>
@@ -111,9 +113,14 @@ export default function ReviewDashboard() {
             {filtered.map((app, idx) => (
               <TableRow key={app.id} className={idx % 2 ? 'bg-gray-50' : ''}>
                 <TableCell>{app.callTitle}</TableCell>
+                <TableCell>
+                  {app.user_first_name || app.user_last_name
+                    ? `${app.user_first_name ?? ''} ${app.user_last_name ?? ''}`.trim()
+                    : '-'}
+                </TableCell>
                 <TableCell>{app.user_email}</TableCell>
-                <TableCell className="text-center">
-                  {app.documents_confirmed ? 'Submitted' : 'Draft'}
+                <TableCell>
+                  {app.created_at ? format(new Date(app.created_at), 'yyyy-MM-dd') : '-'}
                 </TableCell>
                 <TableCell className="text-center">
                   {reviewedIds.includes(app.id) ? 'Reviewed' : 'Needs review'}
