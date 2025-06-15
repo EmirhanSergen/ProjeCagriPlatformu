@@ -23,6 +23,7 @@ from ..crud.application import (
     delete_application_by_id,
     assign_reviewer,
     is_reviewer_assigned,
+    confirm_documents,
 )
 from ..crud.attachment import (
     create_attachment,
@@ -246,6 +247,7 @@ def confirm_application_files(
     if attachments_confirmed(db, application.id):
         raise HTTPException(status_code=400, detail="Attachments already confirmed")
     confirm_attachments(db, application.id)
+    confirm_documents(db, application)
     return {"detail": "Attachments confirmed"}
 
 # Confirm a single attachment
@@ -266,6 +268,7 @@ def confirm_single_attachment(
     if not attachment:
         raise HTTPException(status_code=404, detail="Attachment not found")
     confirm_attachment(db, attachment.id)
+    confirm_documents(db, application)
     return {"detail": "Attachment confirmed"}
 
 # Submit application status
