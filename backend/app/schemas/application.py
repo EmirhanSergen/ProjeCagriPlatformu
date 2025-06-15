@@ -35,6 +35,9 @@ class ApplicationDetail(BaseModel):
     content: str
     documents_confirmed: bool   # Whether the user confirmed their documents
     user_email: str      # Pulled from the User table via JOIN
+    user_first_name: str | None = None
+    user_last_name: str | None = None
+    created_at: datetime
     attachments: list[AttachmentOut]  # List of uploaded documents
     reviewers: list[ReviewerShort]
 

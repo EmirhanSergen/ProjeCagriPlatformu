@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { fetchApplicationDetails, downloadAttachment } from '../../api'
-import type { ApplicationDetail, Attachment } from '../../api'
+import { fetchApplicationDetails, downloadAttachment, fetchCall } from '../../api'
+import type { ApplicationDetail, Attachment, Call } from '../../api'
 import { downloadBlob } from '../../lib/download'
 import { useToast } from '../../components/ToastProvider'
 import { useAuth } from '../../components/AuthProvider'
@@ -10,14 +10,21 @@ import { FileIcon, DownloadIcon } from 'lucide-react'
 export default function ApplicationDetailPage() {
   const { applicationId } = useParams<{ applicationId: string }>()
   const [application, setApplication] = useState<ApplicationDetail | null>(null)
+  const [call, setCall] = useState<Call | null>(null)
   const { user } = useAuth()
   const { showToast } = useToast()
 
   useEffect(() => {
     if (!applicationId) return
     fetchApplicationDetails(Number(applicationId))
-      .then(setApplication)
-      .catch(() => setApplication(null))
+      .then(app => {
+        setApplication(app)
+        fetchCall(app.call_id).then(setCall).catch(() => setCall(null))
+      })
+      .catch(() => {
+        setApplication(null)
+        setCall(null)
+      })
   }, [applicationId])
 
   const getReadableFileName = (filename: string) => {
@@ -39,13 +46,31 @@ export default function ApplicationDetailPage() {
       <div className="border rounded-xl p-6 shadow bg-white space-y-3">
         <h1 className="text-2xl font-bold text-gray-800">Application #{application.id}</h1>
         <div className="space-y-1 text-gray-700">
-          <div className="flex items-center gap-2"><span>📧</span><strong>Applicant Email:</strong> {application.user_email}</div>
+          <div className="flex items-center gap-2">
+            <span>🧑</span>
+            <strong>Applicant:</strong>{' '}
+            {application.user_first_name} {application.user_last_name} ({application.user_email})
+          </div>
+          <div className="flex items-center gap-2">
+            <span>🗓️</span>
+            <strong>Submitted:</strong>{' '}
+            {new Date(application.created_at).toLocaleDateString()}
+          </div>
           <div className="flex items-center gap-2">
             <span>📎</span><strong>Documents Confirmed:</strong>{' '}
             <span className={`ml-1 px-2 py-0.5 rounded text-white text-sm ${application.documents_confirmed ? 'bg-green-500' : 'bg-red-500'}`}>
               {application.documents_confirmed ? 'Yes' : 'No'}
             </span>
           </div>
+          {call && (
+            <div className="flex items-center gap-2">
+              <span>📅</span>
+              <strong>Call:</strong>{' '}
+              {call.start_date ? new Date(call.start_date).toLocaleDateString() : 'N/A'}
+              {' - '}
+              {call.end_date ? new Date(call.end_date).toLocaleDateString() : 'N/A'}
+            </div>
+          )}
           <div className="flex items-center gap-2">
             <span>📌</span><strong>Status:</strong>{' '}
             <span className="bg-gray-200 text-gray-800 px-2 py-0.5 rounded text-sm">{(application as any).status ?? 'Unknown'}</span>
