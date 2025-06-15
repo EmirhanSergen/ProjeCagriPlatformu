@@ -3,6 +3,7 @@ import { useToast } from './ToastProvider'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { registerUser } from '../api'
 import type { RegisterData } from '../api'
+import type { Role } from './RoleSlider'
 import { z } from 'zod'
 import { Link } from 'react-router-dom'
 
@@ -10,7 +11,6 @@ import { Link } from 'react-router-dom'
 const schema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
-  role: z.enum(['applicant', 'reviewer', 'admin']),
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),
   organization: z.string().min(1, 'Organization is required'),
@@ -18,17 +18,18 @@ const schema = z.object({
 
 
 interface Props {
+  role: Role
   onSuccess?: () => void
 }
 
-export default function RegisterForm({ onSuccess }: Props) {
+export default function RegisterForm({ role, onSuccess }: Props) {
   const { register, handleSubmit, formState: { errors, isSubmitting } } =
-    useForm<RegisterData>({ resolver: zodResolver(schema) })
+    useForm<Omit<RegisterData, 'role'>>({ resolver: zodResolver(schema) })
   const { showToast } = useToast()
 
-  const onSubmit = async (data: RegisterData) => {
+  const onSubmit = async (data: Omit<RegisterData, 'role'>) => {
     try {
-      await registerUser(data)
+      await registerUser({ ...data, role })
       showToast('Registration successful! Check your email to verify.', 'success')
       onSuccess?.()
     } catch {
@@ -100,22 +101,6 @@ export default function RegisterForm({ onSuccess }: Props) {
         {errors.organization && <p className="text-sm text-red-600">{errors.organization.message}</p>}
       </div>
 
-      {/* Role */}
-      <div>
-        <label htmlFor="role" className="block text-sm font-medium text-gray-700">Role</label>
-        <select
-          id="role"
-          {...register('role')}
-          disabled={isSubmitting}
-          className="mt-1 block w-full border rounded px-4 py-3"
-        >
-          <option value="">Select role</option>
-          <option value="applicant">Applicant</option>
-          <option value="reviewer">Reviewer</option>
-          <option value="admin">Administrator</option>
-        </select>
-        {errors.role && <p className="text-sm text-red-600">{errors.role.message}</p>}
-      </div>
 
       {/* Submit */}
       <button

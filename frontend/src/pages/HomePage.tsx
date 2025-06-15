@@ -62,7 +62,7 @@ export default function HomePage() {
             Browse Calls
           </Link>
           <Link
-            to="/register"
+            to="/auth"
             className="bg-green-600 text-white px-6 py-3 rounded-lg shadow hover:bg-green-700 transition"
           >
             Get Started
