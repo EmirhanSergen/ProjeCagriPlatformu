@@ -18,6 +18,7 @@ import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import ConfirmModal from '../../components/ui/ConfirmModal'
 import { downloadBlob } from '../../lib/download'
+import { getDisplayFileName } from '../../lib/file'
 
 const acceptMap: Record<string, string> = {
   pdf: 'application/pdf',
@@ -207,7 +208,7 @@ export default function Step2_Upload() {
                       }}
                       className="text-blue-600 underline text-sm"
                     >
-                      {a.file_name}
+                      {getDisplayFileName(a.file_name)}
                     </button>
                   </div>
                 ))}

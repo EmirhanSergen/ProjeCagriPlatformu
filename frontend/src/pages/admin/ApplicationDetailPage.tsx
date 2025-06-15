@@ -8,6 +8,7 @@ import {
 } from '../../api'
 import type { ApplicationDetail, Attachment, Call } from '../../api'
 import { downloadBlob } from '../../lib/download'
+import { getDisplayFileName } from '../../lib/file'
 import { useToast } from '../../components/ToastProvider'
 import { useAuth } from '../../components/AuthProvider'
 import { FileIcon, DownloadIcon } from 'lucide-react'
@@ -32,10 +33,6 @@ export default function ApplicationDetailPage() {
       })
   }, [applicationId])
 
-  const getReadableFileName = (filename: string) => {
-    const parts = filename.split('_')
-    return parts.slice(-1)[0] ?? filename
-  }
 
   if (!application) {
     return (
@@ -104,7 +101,7 @@ export default function ApplicationDetailPage() {
               >
                 <div className="flex items-center gap-3 text-sm text-gray-700 truncate max-w-xs">
                   <FileIcon className="w-5 h-5 text-gray-500" />
-                  <span className="truncate">{getReadableFileName(doc.file_name)}</span>
+                  <span className="truncate">{getDisplayFileName(doc.file_name)}</span>
                 </div>
                   <button
                     onClick={async () => {

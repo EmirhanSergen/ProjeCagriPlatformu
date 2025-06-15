@@ -6,6 +6,7 @@ import {
 } from '../api';
 import { useToast } from './ToastProvider';
 import { downloadBlob } from '../lib/download';
+import { getDisplayFileName } from '../lib/file';
 
 interface Props {
   callId: number;
@@ -76,7 +77,7 @@ export default function ApplicationList({ callId }: Props) {
                         }}
                         className="text-blue-600 underline"
                       >
-                        {att.file_name}
+                        {getDisplayFileName(att.file_name)}
                       </button>
                     </li>
                   ))}
