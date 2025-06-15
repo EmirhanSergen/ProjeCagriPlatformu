@@ -3,9 +3,11 @@ import { useQuery, useMutation } from '@tanstack/react-query'
 import { Button } from '../../components/ui/Button'
 import {
   fetchApplicationByUserAndCall,
+  fetchDocumentDefinitions,
   confirmDocuments,
   submitApplicationStatus,
   type Application,
+  type DocumentDefinition,
 } from '../../api'
 import { useToast } from '../../components/ToastProvider'
 
@@ -19,6 +21,13 @@ export default function Step4_Submit() {
   const { data: application, isLoading, isError } = useQuery<Application>({
     queryKey: ['application', cid],
     queryFn: () => fetchApplicationByUserAndCall(cid),
+    enabled: !!cid,
+  })
+
+  // 1b) Doküman tanımlarını çek
+  const { data: documents = [] } = useQuery<DocumentDefinition[]>({
+    queryKey: ['documents', cid],
+    queryFn: () => fetchDocumentDefinitions(cid),
     enabled: !!cid,
   })
 
@@ -37,13 +46,15 @@ export default function Step4_Submit() {
   // 3) Önce doküman onayı, sonra submit
   const handleSubmit = async () => {
     if (!application) return
-    try {
-      await confirmDocuments(application.id)
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e)
-      if (!msg.includes('Attachments already confirmed')) {
-        showToast(msg || 'Failed to confirm documents', 'error')
-        return
+    if (documents.length > 0) {
+      try {
+        await confirmDocuments(application.id)
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e)
+        if (!msg.includes('Attachments already confirmed')) {
+          showToast(msg || 'Failed to confirm documents', 'error')
+          return
+        }
       }
     }
     submitMutate()

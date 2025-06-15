@@ -56,6 +56,14 @@ export default function Step3_Review() {
 
   if (loading) return <p className="p-4">Loading...</p>
 
+  if (documents.length === 0)
+    return (
+      <div className="p-4 space-y-4">
+        <h1 className="text-xl font-bold">Review Your Uploaded Documents</h1>
+        <p className="text-gray-600">This call does not require document uploads.</p>
+      </div>
+    )
+
   return (
     <div className="space-y-6 p-4">
       <h1 className="text-xl font-bold">Review Your Uploaded Documents</h1>
@@ -93,13 +101,15 @@ export default function Step3_Review() {
         )
       })}
 
-      <Button
-        onClick={handleConfirm}
-        className="mt-6"
-        disabled={confirming}
-      >
-        {confirming ? 'Confirming…' : 'Confirm Documents'}
-      </Button>
+      {documents.length > 0 && (
+        <Button
+          onClick={handleConfirm}
+          className="mt-6"
+          disabled={confirming}
+        >
+          {confirming ? 'Confirming…' : 'Confirm Documents'}
+        </Button>
+      )}
     </div>
   )
 }
