@@ -67,14 +67,14 @@ export default function Step2_Upload() {
   }, [cid, showToast])
 
   useEffect(() => {
-    if (!application?.id) return
-      fetchAttachmentsByApplicationId(application.id)
-        .then(setAttachments)
-        .catch((e: any) => {
-          if (e.message.includes('404')) setAttachments([])
-          else showToast('Failed to load attachments', 'error')
-        })
-    }, [application?.id, showToast])
+    if (!application?.id) return;
+    fetchAttachmentsByApplicationId(application.id)
+      .then(setAttachments)
+      .catch((e: any) => {
+        if (e.message.includes('404')) setAttachments([])
+        else showToast('Failed to load attachments', 'error')
+      });
+  }, [application?.id, showToast])
 
   // Clear selected files when switching documents
   useEffect(() => {
