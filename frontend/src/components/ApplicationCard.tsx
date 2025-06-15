@@ -50,7 +50,23 @@ export default function ApplicationCard({ application }: Props) {
   const assignedReviewers = application.reviewers || []
 
   return (
-    <div className="border rounded-lg p-5 shadow-md bg-white space-y-4">
+    <li className="border rounded-lg p-4 shadow-sm bg-white space-y-4">
+      <div className="space-y-1">
+        <p className="text-sm text-gray-500">Application ID: {application.id}</p>
+        <h2 className="text-lg font-semibold text-gray-800">{application.user.email}</h2>
+        <p className="text-sm text-gray-600">
+          Documents Confirmed:{' '}
+          <span
+            className={
+              confirmedCount === totalCount && totalCount > 0
+                ? 'text-green-700'
+                : 'text-red-600'
+            }
+          >
+            {confirmedCount}/{totalCount}
+          </span>
+        </p>
+      </div>
       <div className="flex justify-between items-center">
         <div className="space-y-1">
           <p className="text-xs text-gray-500">Application ID: {application.id}</p>

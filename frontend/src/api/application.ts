@@ -35,9 +35,7 @@ export interface User {
 }
 
 export interface ApplicationDetail extends Application {
-  user_email: string
-  user_first_name?: string
-  user_last_name?: string
+  user: User
   created_at: string
   documents_confirmed: boolean
   attachments: Attachment[]

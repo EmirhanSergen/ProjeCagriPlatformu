@@ -82,7 +82,7 @@ export default function ReviewApplicationPage() {
 
       <div className="space-y-1">
         <p>
-          <strong>Applicant:</strong> {application.user_email}
+          <strong>Applicant:</strong> {application.user.email}
         </p>
         <p>
           <strong>Documents Confirmed:</strong>{' '}

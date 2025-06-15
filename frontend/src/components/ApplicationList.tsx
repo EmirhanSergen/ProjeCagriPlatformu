@@ -59,7 +59,7 @@ export default function ApplicationList({ callId }: Props) {
         <ul className="space-y-4">
           {filtered.map((app) => (
             <li key={app.id} className="border p-4 rounded shadow">
-              <p className="font-semibold">{app.user_email}</p>
+              <p className="font-semibold">{app.user.email}</p>
               <p>Status: {app.documents_confirmed ? 'Submitted' : 'In Progress'}</p>
               {app.attachments.length > 0 && (
                 <ul className="list-disc pl-5">
