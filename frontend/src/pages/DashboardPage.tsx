@@ -17,7 +17,7 @@ export default function DashboardPage() {
         navigate('/admin/calls')
         break
       case 'reviewer':
-        navigate('/reviewer/reviews')
+        navigate('/reviewer')
         break
       case 'applicant':
         navigate('/calls')

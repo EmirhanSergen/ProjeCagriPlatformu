@@ -24,6 +24,8 @@ const CreateCallPage = React.lazy(() => import('./pages/admin/CreateCallPage'))
 const EditCallPage = React.lazy(() => import('./pages/admin/EditCallPage'))
 const CallDocumentsPage = React.lazy(() => import('./pages/admin/CallDocumentsPage'))
 const CallApplicationsPage = React.lazy(() => import('./pages/reviewer/CallApplicationsPage'))
+const ReviewDashboard = React.lazy(() => import('./pages/reviewer/ReviewDashboard'))
+const ReviewApplicationPage = React.lazy(() => import('./pages/reviewer/ReviewApplicationPage'))
 const ApplicationDetailPage = React.lazy(() => import('./pages/admin/ApplicationDetailPage'))
 const NotFoundPage = React.lazy(() => import('./pages/NotFoundPage'))
 
@@ -55,6 +57,8 @@ export const appRoutes = [
   },
 
   // Reviewer / Kullanıcı
+  { path: '/reviewer', element: <PrivateRoute roles={["reviewer"]}><ReviewDashboard /></PrivateRoute> },
+  { path: '/reviewer/applications/:applicationId', element: <PrivateRoute roles={["reviewer"]}><ReviewApplicationPage /></PrivateRoute> },
   { path: '/calls', element: <PrivateRoute><CallsPage /></PrivateRoute> },
   { path: '/calls/:callId', element: <PrivateRoute><CallDetailPage /></PrivateRoute> },
 
