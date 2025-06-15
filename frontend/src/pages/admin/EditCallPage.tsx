@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -10,6 +10,7 @@ import {
   createDocumentDefinition,
   updateDocumentDefinition,
   deleteDocumentDefinition,
+  fetchCalls,
   type CallInput,
   type DocumentDefinition
 } from '../../api'
@@ -32,7 +33,7 @@ const CallSchema = z.object({
   is_open: z.boolean().optional(),
   start_date: z.string().optional(),
   end_date: z.string().optional(),
-  category: z.enum(['Research', 'Development', 'Innovation']),
+  category: z.string().min(1, 'Category is required'),
   max_applications: z.coerce.number().int().min(1, 'Must be at least 1'),
   items: z.array(DocumentSchema),
 })
@@ -45,6 +46,17 @@ export default function EditCallPage() {
   const navigate = useNavigate()
   const { showToast } = useToast()
   const { user } = useAuth()
+
+  const [categories, setCategories] = useState<string[]>([])
+
+  useEffect(() => {
+    fetchCalls()
+      .then(data => {
+        const unique = Array.from(new Set(data.map(c => c.category).filter(Boolean))) as string[]
+        setCategories(unique)
+      })
+      .catch(() => setCategories([]))
+  }, [])
 
   // Redirect if not an admin
   useEffect(() => {
@@ -67,7 +79,7 @@ export default function EditCallPage() {
       is_open: false,
       start_date: '',
       end_date: '',
-      category: 'Research',
+      category: '',
       max_applications: 1,
       items: []
     },
@@ -96,7 +108,7 @@ export default function EditCallPage() {
           is_open: call.is_open,
           start_date: call.start_date?.slice(0,10) ?? '',
           end_date: call.end_date?.slice(0,10) ?? '',
-          category: call.category as 'Research'|'Development'|'Innovation',
+          category: call.category ?? '',
           max_applications: call.max_applications ?? 1,
           items: mapped
         })
@@ -108,14 +120,13 @@ export default function EditCallPage() {
 
   const onSubmit = handleSubmit(async (data) => {
     try {
-      // Prepare payload, casting category to the enum
       const payload: CallInput = {
         title: data.title,
         description: data.description || null,
         is_open: data.is_open,
         start_date: data.start_date || null,
         end_date: data.end_date || null,
-        category: data.category as 'Research'|'Development'|'Innovation',
+        category: data.category,
         max_applications: data.max_applications
       }
       await updateCall(id, payload)
@@ -181,11 +192,16 @@ export default function EditCallPage() {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block font-medium">Category</label>
-          <select {...register('category')} className="w-full border rounded p-2 focus:ring-blue-500">
-            <option value="Research">Research</option>
-            <option value="Development">Development</option>
-            <option value="Innovation">Innovation</option>
-          </select>
+          <input
+            list="category-options"
+            {...register('category')}
+            className="w-full border rounded p-2 focus:ring-blue-500"
+          />
+          <datalist id="category-options">
+            {categories.map(cat => (
+              <option key={cat} value={cat} />
+            ))}
+          </datalist>
         </div>
         <div>
           <label className="block font-medium">Max Applications</label>
