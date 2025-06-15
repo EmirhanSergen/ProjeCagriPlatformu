@@ -16,7 +16,7 @@ export interface Application {
 export interface MyApplication extends Application {
   status: 'DRAFT' | 'SUBMITTED' | 'CLOSED' | 'ARCHIVED'
   created_at: string
-  updated_at?: string
+  updated_at: string
 }
 
 export interface Attachment {
