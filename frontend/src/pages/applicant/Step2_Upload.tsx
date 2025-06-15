@@ -19,6 +19,18 @@ import { Input } from '../../components/ui/Input'
 import ConfirmModal from '../../components/ui/ConfirmModal'
 import { downloadBlob } from '../../lib/download'
 
+const acceptMap: Record<string, string> = {
+  pdf: 'application/pdf',
+  image: 'image/*',
+  text: 'text/plain',
+}
+
+const noteMap: Record<string, string> = {
+  pdf: '.pdf',
+  image: '.jpg, .png, .gif',
+  text: '.txt',
+}
+
 export default function Step2_Upload() {
   const { callId } = useParams<{ callId: string }>()
   const cid = Number(callId)
@@ -32,6 +44,10 @@ export default function Step2_Upload() {
   const [pendingAttachment, setPendingAttachment] = useState<Attachment | null>(null)
   const { showToast } = useToast()
   const init = useRef(false)
+
+  const selectedDoc = documents.find(d => d.id === selectedDocId) || null
+  const accept = selectedDoc ? acceptMap[selectedDoc.allowed_formats] : undefined
+  const formatsNote = selectedDoc ? noteMap[selectedDoc.allowed_formats] : ''
 
   useEffect(() => {
     if (!cid || init.current) return
@@ -165,8 +181,12 @@ export default function Step2_Upload() {
             <Input
               key={selectedDocId}
               type="file"
+              accept={accept}
               onChange={e => setSelectedFiles(Array.from(e.target.files || []))}
             />
+            <p className="text-sm text-gray-500 mt-1">
+              Accepted formats: {formatsNote}
+            </p>
             <Button onClick={handleUpload} className="mt-2">
               Save
             </Button>
