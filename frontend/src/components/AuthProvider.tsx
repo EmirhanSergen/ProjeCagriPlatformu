@@ -8,8 +8,8 @@ export interface AuthContextType {
     id: number
     email: string
     role: 'admin' | 'reviewer' | 'applicant'
-    firstName?: string
-    lastName?: string
+    first_name?: string
+    last_name?: string
     organization?: string
   } | null
   role: string | null
@@ -33,8 +33,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           id: decoded.userId,
           email: decoded.email,
           role: decoded.role,
-          firstName: decoded.firstName,
-          lastName: decoded.lastName,
+          first_name: decoded.firstName,
+          last_name: decoded.lastName,
           organization: decoded.organization,
         })
       } catch {
@@ -52,8 +52,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         id: decoded.userId,
         email: decoded.email,
         role: decoded.role,
-        firstName: decoded.firstName,
-        lastName: decoded.lastName,
+        first_name: decoded.firstName,
+        last_name: decoded.lastName,
         organization: decoded.organization,
       })
     } catch {
