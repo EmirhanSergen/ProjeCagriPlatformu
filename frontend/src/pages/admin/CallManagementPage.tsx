@@ -89,8 +89,8 @@ export default function CallManagementPage() {
       await deleteCall(pendingDeleteId)
       showToast('Call deleted', 'success')
       setCalls(prev => prev.filter(c => c.id !== pendingDeleteId))
-    } catch {
-      showToast('Failed to delete call', 'error')
+    } catch (e: any) {
+      showToast(e.message || 'Failed to delete call', 'error')
     } finally {
       setDeletingId(null)
       setPendingDeleteId(null)
