@@ -7,7 +7,7 @@ import os, uuid
 from app.dependencies import get_db
 from ..dependencies import get_current_user, get_current_admin, get_current_admin_or_reviewer
 from ..models.application import Application, ApplicationStatus
-from ..models.user import User
+from ..models.user import User, UserRole
 from ..models.document import DocumentDefinition
 from ..models.attachment import Attachment
 from ..schemas.application import ApplicationCreate, ApplicationOut, ApplicationDetail
@@ -22,6 +22,7 @@ from ..crud.application import (
     get_applications_by_user,
     delete_application_by_id,
     assign_reviewer,
+    is_reviewer_assigned,
 )
 from ..crud.attachment import (
     create_attachment,
@@ -182,6 +183,32 @@ def download_attachment(
     ).first()
     if not attachment:
         raise HTTPException(status_code=404, detail="Attachment not found")
+    return Response(
+        content=attachment.data,
+        media_type="application/octet-stream",
+        headers={"Content-Disposition": f"attachment; filename={attachment.file_name}"},
+    )
+
+# Admin/Reviewer: Download attachment for review
+@router.get("/attachments/{attachment_id}/review-download")
+def download_attachment_for_review(
+    attachment_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_or_reviewer),
+):
+    attachment = (
+        db.query(Attachment)
+        .join(Application)
+        .filter(Attachment.id == attachment_id)
+        .first()
+    )
+    if not attachment:
+        raise HTTPException(status_code=404, detail="Attachment not found")
+    application = attachment.application
+    if current_user.role == UserRole.REVIEWER and not is_reviewer_assigned(
+        db, application.id, current_user.id
+    ):
+        raise HTTPException(status_code=403, detail="Not assigned to this application")
     return Response(
         content=attachment.data,
         media_type="application/octet-stream",
