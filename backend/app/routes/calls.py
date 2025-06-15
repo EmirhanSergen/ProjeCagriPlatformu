@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status, Query, 
 from fastapi.responses import Response as FastAPIResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from typing import List
 import pdfkit
 
@@ -76,7 +77,11 @@ def delete_existing_call(
     db: Session = Depends(get_db),
     current_admin=Depends(get_current_admin),
 ):
-    deleted = delete_call(db, call_id)
+    try:
+        deleted = delete_call(db, call_id)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="Call has active applications")
     if not deleted:
         raise HTTPException(status_code=404, detail="Call not found")
     return Response(status_code=status.HTTP_204_NO_CONTENT)
