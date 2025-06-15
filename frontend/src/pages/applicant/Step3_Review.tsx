@@ -54,13 +54,15 @@ export default function Step3_Review() {
     }
   }
 
-  const getDisplayFileName = (fileName: string) => {
-    const parts = fileName.split('_')
-    const lastPart = parts[parts.length - 1]
-    return lastPart || fileName
-  }
+  if (loading) return <p className="p-4">Loading...</p>
 
-  if (loading) return <p className="p-6 text-gray-600">Loading documents…</p>
+  if (documents.length === 0)
+    return (
+      <div className="p-4 space-y-4">
+        <h1 className="text-xl font-bold">Review Your Uploaded Documents</h1>
+        <p className="text-gray-600">This call does not require document uploads.</p>
+      </div>
+    )
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
@@ -106,15 +108,15 @@ export default function Step3_Review() {
         )
       })}
 
-      <div className="pt-4">
+      {documents.length > 0 && (
         <Button
           onClick={handleConfirm}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+          className="mt-6"
           disabled={confirming}
         >
-          {confirming ? 'Confirming…' : '✅ Confirm All Documents'}
+          {confirming ? 'Confirming…' : 'Confirm Documents'}
         </Button>
-      </div>
+      )}
     </div>
   )
 }
