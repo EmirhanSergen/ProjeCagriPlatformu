@@ -1,6 +1,7 @@
 import type { ApplicationDetail, User } from '../api'
 import { assignReviewer, fetchReviewers } from '../api'
 import { useEffect, useState } from 'react'
+import { useToast } from './ToastProvider'
 import { Link } from 'react-router-dom'
 import { FileText } from 'lucide-react'
 
@@ -12,6 +13,7 @@ export default function ApplicationCard({ application }: Props) {
   const [reviewers, setReviewers] = useState<User[]>([])
   const [selectedReviewerId, setSelectedReviewerId] = useState<number | null>(null)
   const [assigning, setAssigning] = useState(false)
+  const { showToast } = useToast()
 
   const isAdmin = localStorage.getItem('role') === 'admin'
 
@@ -26,9 +28,9 @@ export default function ApplicationCard({ application }: Props) {
     setAssigning(true)
     try {
       await assignReviewer(application.id, selectedReviewerId)
-      alert('Reviewer assigned successfully')
+      showToast('Reviewer assigned successfully', 'success')
     } catch {
-      alert('Failed to assign reviewer')
+      showToast('Failed to assign reviewer', 'error')
     } finally {
       setAssigning(false)
     }
