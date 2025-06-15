@@ -1,8 +1,9 @@
 import { useForm, useFieldArray } from 'react-hook-form'
+import { useEffect, useState } from 'react'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from 'react-router-dom'
-import { createCall, createDocumentDefinition } from '../../api'
+import { createCall, createDocumentDefinition, fetchCalls } from '../../api'
 import { useToast } from '../../components/ToastProvider'
 
 const allowedFormats = ['pdf', 'image', 'text'] as const
@@ -18,7 +19,7 @@ const schema = z.object({
   is_open: z.boolean().optional(),
   start_date: z.string().min(1, 'Start date is required'),
   end_date: z.string().min(1, 'End date is required'),
-  category: z.enum(['Research', 'Development', 'Innovation']),
+  category: z.string().min(1, 'Category is required'),
   max_applications: z.coerce.number().int().min(1),
   documents: z.array(docSchema),
 })
@@ -29,6 +30,17 @@ export default function CreateCallPage() {
   const navigate = useNavigate()
   const { showToast } = useToast()
 
+  const [categories, setCategories] = useState<string[]>([])
+
+  useEffect(() => {
+    fetchCalls()
+      .then(data => {
+        const unique = Array.from(new Set(data.map(c => c.category).filter(Boolean))) as string[]
+        setCategories(unique)
+      })
+      .catch(() => setCategories([]))
+  }, [])
+
   const {
     register,
     control,
@@ -38,7 +50,7 @@ export default function CreateCallPage() {
     resolver: zodResolver(schema),
     defaultValues: {
       documents: [],
-      category: 'Research',
+      category: '',
       max_applications: 1,
     },
   })
@@ -107,11 +119,16 @@ export default function CreateCallPage() {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block font-medium text-gray-700">Category</label>
-          <select {...register('category')} className="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <option value="Research">Research</option>
-            <option value="Development">Development</option>
-            <option value="Innovation">Innovation</option>
-          </select>
+          <input
+            list="category-options"
+            {...register('category')}
+            className="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <datalist id="category-options">
+            {categories.map(cat => (
+              <option key={cat} value={cat} />
+            ))}
+          </datalist>
         </div>
         <div>
           <label className="block font-medium text-gray-700">Max Applications</label>
