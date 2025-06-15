@@ -10,6 +10,9 @@ export default function RegisterPage() {
       <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg">
         <h1 className="text-2xl font-bold text-center mb-6">Create Your Account</h1>
         {role && (
+          <p className="text-center mb-4 capitalize text-gray-700">Role: {role}</p>
+        )}
+        {role && (
           <RegisterForm role={role} onSuccess={() => navigate(`/login/${role}`)} />
         )}
       </div>
