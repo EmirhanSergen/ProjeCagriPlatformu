@@ -13,7 +13,12 @@ export default function RegisterPage() {
           <p className="text-center mb-4 capitalize text-gray-700">Role: {role}</p>
         )}
         {role && (
-          <RegisterForm role={role} onSuccess={() => navigate(`/login/${role}`)} />
+          <RegisterForm
+            role={role}
+            onSuccess={() =>
+              navigate(role === 'reviewer' ? '/reviewer/link' : `/login/${role}`)
+            }
+          />
         )}
       </div>
     </section>
