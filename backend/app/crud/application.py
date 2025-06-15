@@ -9,6 +9,16 @@ from app.schemas.application import ApplicationDetail, ReviewerShort
 from app.models.application_reviewer import ApplicationReviewer
 
 
+def is_reviewer_assigned(db: Session, application_id: int, user_id: int) -> bool:
+    """Return True if the given user is assigned as reviewer to the application."""
+    return (
+        db.query(ApplicationReviewer)
+        .filter_by(application_id=application_id, user_id=user_id)
+        .first()
+        is not None
+    )
+
+
 def create_application(db: Session, call_id: int, content: str, user_id: int) -> Application:
     # 1) Çağrı var mı ve açık mı?
     call = db.query(Call).filter(Call.id == call_id, Call.is_open == True).first()

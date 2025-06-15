@@ -1,6 +1,9 @@
 import { useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { fetchApplicationDetails, downloadAttachment } from '../../api'
+import {
+  fetchApplicationDetails,
+  downloadAttachmentForReview,
+} from '../../api'
 import type { ApplicationDetail, Attachment } from '../../api'
 import { downloadBlob } from '../../lib/download'
 import { useToast } from '../../components/ToastProvider'
@@ -58,7 +61,7 @@ export default function ApplicationDetailPage() {
                 <button
                   onClick={async () => {
                     try {
-                      const blob = await downloadAttachment(doc.id)
+                      const blob = await downloadAttachmentForReview(doc.id)
                       downloadBlob(blob, doc.file_name)
                     } catch {
                       showToast('Failed to download file', 'error')

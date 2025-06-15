@@ -1,5 +1,5 @@
 import type { Attachment } from '../api'
-import { downloadAttachment } from '../api'
+import { downloadAttachmentForReview } from '../api'
 import { downloadBlob } from '../lib/download'
 
 
@@ -15,7 +15,7 @@ export default function AttachmentList({ attachments }: Props) {
           <button
             onClick={async () => {
               try {
-                const blob = await downloadAttachment(a.id)
+                const blob = await downloadAttachmentForReview(a.id)
                 downloadBlob(blob, a.file_name)
               } catch {
                 // AttachmentList has no toast context by default; swallow errors
