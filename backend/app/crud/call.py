@@ -1,6 +1,8 @@
 from sqlalchemy.orm import Session
+from fastapi import HTTPException
 
 from ..models.call import Call as CallModel, CallStatus
+from ..models.application import Application
 from ..schemas.call import CallCreate, CallUpdate
 
 def create_call(db: Session, call_in: CallCreate) -> CallModel:
@@ -48,6 +50,12 @@ def delete_call(db: Session, call_id: int) -> bool:
     db_call = db.query(CallModel).filter(CallModel.id == call_id).first()
     if not db_call:
         return False
+    # Prevent deleting calls that still have applications
+    has_apps = (
+        db.query(Application).filter(Application.call_id == call_id).first() is not None
+    )
+    if has_apps:
+        raise HTTPException(status_code=409, detail="Call has active applications")
     db.delete(db_call)
     db.commit()
     return True
