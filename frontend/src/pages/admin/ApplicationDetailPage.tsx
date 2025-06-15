@@ -50,7 +50,6 @@ export default function ApplicationDetailPage() {
             <span>📌</span><strong>Status:</strong>{' '}
             <span className="bg-gray-200 text-gray-800 px-2 py-0.5 rounded text-sm">{(application as any).status ?? 'Unknown'}</span>
           </div>
-          <div className="flex items-center gap-2"><span>🧑‍💼</span><strong>Viewed by:</strong> {user?.role ?? 'Unknown'}</div>
         </div>
       </div>
 
