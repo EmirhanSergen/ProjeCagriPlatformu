@@ -23,6 +23,7 @@ export interface Attachment {
   id: number
   file_name: string
   document_id: number
+  is_confirmed: boolean
 }
 
 export interface User {
