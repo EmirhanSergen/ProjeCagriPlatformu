@@ -68,15 +68,15 @@ export default function CallApplicationsPage() {
   })
 
   return (
-    <section className="space-y-6">
-      <div className="flex justify-between items-center flex-wrap gap-4">
+    <section className="space-y-6 px-4 max-w-5xl mx-auto">
+      {/* Başlık ve filtreler */}
+      <div className="flex flex-wrap justify-between items-center gap-4">
         <h1 className="text-2xl font-bold">
           {userRole === 'admin' ? 'All Applications' : 'Assigned Applications'}
         </h1>
-        <div className="flex items-center gap-4">
-          <p className="text-sm text-gray-700">
-            🗂️ Total: <strong>{total}</strong> | 👤 Unassigned: <strong>{unassigned}</strong>
-          </p>
+        <div className="flex items-center gap-4 text-sm text-gray-700">
+          <p className="bg-gray-100 px-3 py-1 rounded">🗂️ Total: <strong>{total}</strong></p>
+          <p className="bg-gray-100 px-3 py-1 rounded">👤 Unassigned: <strong>{unassigned}</strong></p>
           <Select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)}>
             <option value="newest">Sort: Newest</option>
             <option value="unassigned">Unassigned First</option>
@@ -85,6 +85,7 @@ export default function CallApplicationsPage() {
         </div>
       </div>
 
+      {/* Arama */}
       <Input
         placeholder="Search by email, name or organization..."
         value={search}
@@ -92,10 +93,13 @@ export default function CallApplicationsPage() {
         className="w-full max-w-md"
       />
 
+      {/* Liste */}
       {sortedApps.length > 0 ? (
-        sortedApps.map((app) => (
-          <ApplicationCard key={app.id} application={app} />
-        ))
+        <ul className="space-y-4">
+          {sortedApps.map((app) => (
+            <ApplicationCard key={app.id} application={app} />
+          ))}
+        </ul>
       ) : (
         <p className="text-gray-500 italic">No matching applications.</p>
       )}

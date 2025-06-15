@@ -18,6 +18,7 @@ class ApplicationOut(BaseModel):
     documents_confirmed: bool
     status: str
     created_at: datetime
+    updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -36,6 +37,7 @@ class ApplicationDetail(BaseModel):
     user_id: int
     call_id: int
     content: str
+    status: str
     documents_confirmed: bool   # Whether the user confirmed their documents
     user: UserOut
     created_at: datetime

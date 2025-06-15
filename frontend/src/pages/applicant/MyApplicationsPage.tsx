@@ -8,6 +8,8 @@ import {
   type MyApplication,
   type Call,
   type Attachment,
+  fetchDocumentDefinitions,
+  type DocumentDefinition,
 } from '../../api'
 import { useToast } from '../../components/ToastProvider'
 import {
@@ -25,13 +27,14 @@ interface MyAppWithCall extends MyApplication {
   callTitle?: string
   callCategory?: string
   attachmentsCount?: number
+  totalDocs?: number
 }
 
 const statusColorMap: Record<string, string> = {
-  DRAFT: 'bg-yellow-100 text-yellow-800',
-  SUBMITTED: 'bg-blue-100 text-blue-800',
-  CLOSED: 'bg-gray-200 text-gray-800',
-  ARCHIVED: 'bg-red-100 text-red-800',
+  draft: 'bg-yellow-100 text-yellow-800',
+  submitted: 'bg-blue-100 text-blue-800',
+  closed: 'bg-gray-200 text-gray-800',
+  archived: 'bg-red-100 text-red-800',
 }
 
 export default function MyApplicationsPage() {
@@ -46,6 +49,7 @@ export default function MyApplicationsPage() {
           apps.map(async app => {
             let call: Call | null = null
             let attachments: Attachment[] = []
+            let docs: DocumentDefinition[] = []
             try {
               call = await fetchCall(app.call_id)
             } catch {
@@ -56,11 +60,17 @@ export default function MyApplicationsPage() {
             } catch {
               // ignore error
             }
+            try {
+              docs = await fetchDocumentDefinitions(app.call_id)
+            } catch {
+              // ignore error
+            }
             return {
               ...app,
               callTitle: call?.title,
               callCategory: call?.category,
               attachmentsCount: attachments.length,
+              totalDocs: docs.length,
             }
           })
         )
@@ -107,19 +117,27 @@ export default function MyApplicationsPage() {
                 <TableCell className="font-medium">{app.callTitle ?? `Call #${app.call_id}`}</TableCell>
                 <TableCell>{app.callCategory ?? '-'}</TableCell>
                 <TableCell>
-                  <Badge className={statusColorMap[app.status] || 'bg-gray-100 text-gray-800'}>
-                    {app.status}
+                  <Badge
+                    className={
+                      statusColorMap[app.status.toLowerCase()] ||
+                      'bg-gray-100 text-gray-800'
+                    }
+                  >
+                    {app.status.charAt(0).toUpperCase() + app.status.slice(1).toLowerCase()}
                   </Badge>
                 </TableCell>
                 <TableCell>{format(new Date(app.created_at), 'yyyy-MM-dd')}</TableCell>
                 <TableCell>{app.updated_at ? format(new Date(app.updated_at), 'yyyy-MM-dd') : '-'}</TableCell>
-                <TableCell>{app.attachmentsCount ?? 0}</TableCell>
+                <TableCell>
+                  {app.attachmentsCount ?? 0}
+                  {typeof app.totalDocs === 'number' ? ` / ${app.totalDocs}` : ''}
+                </TableCell>
                 <TableCell className="text-right">
                   <Link
                     to={`/applicant/${app.call_id}/step1`}
                     className="text-blue-600 hover:underline"
                   >
-                    {app.status === 'DRAFT' ? 'Continue' : 'View'}
+                    {app.status.toLowerCase() === 'draft' ? 'Continue' : 'View'}
                   </Link>
                 </TableCell>
               </TableRow>
