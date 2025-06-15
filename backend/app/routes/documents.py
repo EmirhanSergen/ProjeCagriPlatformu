@@ -69,12 +69,7 @@ def update_definition(
     if not doc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
 
-    updated = update_document_definition(
-        db, doc,
-        name=doc_in.name,
-        allowed_formats=doc_in.allowed_formats,
-        description=doc_in.description
-    )
+    updated = update_document_definition(db, doc, doc_in)
     return updated
 
 @router.delete("/{doc_id}", status_code=status.HTTP_204_NO_CONTENT)

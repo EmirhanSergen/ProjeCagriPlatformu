@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
 from ..models.document import DocumentDefinition
-from ..schemas.document import DocumentFormat
+from ..schemas.document import DocumentFormat, DocumentDefinitionUpdate
 
 
 def create_document_definition(
@@ -23,10 +23,12 @@ def create_document_definition(
     return doc
 
 
-def update_document_definition(db: Session, doc: DocumentDefinition, doc_update: dict) -> DocumentDefinition:
+def update_document_definition(
+    db: Session, doc: DocumentDefinition, doc_update: DocumentDefinitionUpdate
+) -> DocumentDefinition:
     data = doc_update.model_dump(exclude_unset=True)
-    for key, value in data.items():
-        setattr(doc, key, value)
+    for field, value in data.items():
+        setattr(doc, field, value)
     db.commit()
     db.refresh(doc)
     return doc
