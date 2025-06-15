@@ -8,7 +8,7 @@ from app.dependencies import get_db
 from ..dependencies import get_current_user, get_current_admin, get_current_admin_or_reviewer
 from ..models.application import Application, ApplicationStatus
 from ..models.user import User, UserRole
-from ..models.document import DocumentDefinition
+from ..models.document import DocumentDefinition, DocumentFormat
 from ..models.attachment import Attachment
 from ..schemas.application import ApplicationCreate, ApplicationOut, ApplicationDetail
 from ..schemas.attachment import AttachmentOut
@@ -35,6 +35,19 @@ from ..crud.attachment import (
 )
 
 router = APIRouter(prefix="/applications", tags=["applications"])
+
+# Allowed file extensions for each document format
+ALLOWED_EXTENSIONS = {
+    DocumentFormat.pdf: {"pdf"},
+    DocumentFormat.image: {"png", "jpg", "jpeg", "gif"},
+    DocumentFormat.text: {"txt"},
+}
+
+
+def _is_valid_extension(document: DocumentDefinition, ext: str) -> bool:
+    """Check if file extension is allowed for the document definition."""
+    allowed = ALLOWED_EXTENSIONS.get(document.allowed_formats, {document.allowed_formats.value})
+    return ext in allowed
 
 # Submit a new application
 @router.post("/", response_model=ApplicationOut, status_code=status.HTTP_201_CREATED)
@@ -99,7 +112,7 @@ def upload_application_files(
         )
         if not document:
             raise HTTPException(status_code=400, detail="Invalid document ID for this call")
-        if ext not in document.allowed_formats.split(","):
+        if not _is_valid_extension(document, ext):
             raise HTTPException(status_code=400, detail=f"Invalid file format: .{ext}")
 
         unique_name = f"{uuid.uuid4().hex}_{filename}"
@@ -141,7 +154,7 @@ def upload_attachment(
         raise HTTPException(status_code=400, detail="Invalid document ID for this call")
 
     ext = file.filename.rsplit('.', 1)[-1].lower()
-    if ext not in document.allowed_formats.split(','):
+    if not _is_valid_extension(document, ext):
         raise HTTPException(status_code=400, detail=f"Invalid file format: .{ext}")
 
     filename = f"{uuid.uuid4().hex}.{ext}"
