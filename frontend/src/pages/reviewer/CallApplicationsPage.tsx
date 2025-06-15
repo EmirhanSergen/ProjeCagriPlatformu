@@ -46,9 +46,15 @@ export default function CallApplicationsPage() {
       <h1 className="text-xl font-bold">
         {userRole === 'admin' ? 'All Applications' : 'Assigned Applications'}
       </h1>
-      {applications.map((app) => (
-        <ApplicationCard key={app.id} application={app} />
-      ))}
+      {applications.length === 0 ? (
+        <p>No applications found.</p>
+      ) : (
+        <ul className="space-y-4">
+          {applications.map(app => (
+            <ApplicationCard key={app.id} application={app} />
+          ))}
+        </ul>
+      )}
     </section>
   )
 }
