@@ -33,6 +33,9 @@ export default function ApplicationDetailPage() {
     )
   }
 
+  const confirmedCount = application.attachments?.filter(a => a.is_confirmed).length || 0
+  const totalCount = application.attachments?.length || 0
+
   return (
     <section className="max-w-3xl mx-auto space-y-6 px-4">
       {/* Header */}
@@ -42,8 +45,14 @@ export default function ApplicationDetailPage() {
           <div className="flex items-center gap-2"><span>📧</span><strong>Applicant Email:</strong> {application.user_email}</div>
           <div className="flex items-center gap-2">
             <span>📎</span><strong>Documents Confirmed:</strong>{' '}
-            <span className={`ml-1 px-2 py-0.5 rounded text-white text-sm ${application.documents_confirmed ? 'bg-green-500' : 'bg-red-500'}`}>
-              {application.documents_confirmed ? 'Yes' : 'No'}
+            <span
+              className={`ml-1 px-2 py-0.5 rounded text-white text-sm ${
+                confirmedCount === totalCount && totalCount > 0
+                  ? 'bg-green-500'
+                  : 'bg-red-500'
+              }`}
+            >
+              {confirmedCount}/{totalCount}
             </span>
           </div>
           <div className="flex items-center gap-2">

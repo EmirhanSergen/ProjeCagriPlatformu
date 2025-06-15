@@ -34,6 +34,10 @@ export default function ApplicationCard({ application }: Props) {
     }
   }
 
+  const confirmedCount = application.attachments?.filter(a => a.is_confirmed)
+    .length || 0
+  const totalCount = application.attachments?.length || 0
+
   return (
     <li className="border rounded-lg p-4 shadow-sm bg-white space-y-4">
       <div className="space-y-1">
@@ -41,8 +45,14 @@ export default function ApplicationCard({ application }: Props) {
         <h2 className="text-lg font-semibold text-gray-800">{application.user_email}</h2>
         <p className="text-sm text-gray-600">
           Documents Confirmed:{' '}
-          <span className={application.documents_confirmed ? 'text-green-700' : 'text-red-600'}>
-            {application.documents_confirmed ? 'Yes' : 'No'}
+          <span
+            className={
+              confirmedCount === totalCount && totalCount > 0
+                ? 'text-green-700'
+                : 'text-red-600'
+            }
+          >
+            {confirmedCount}/{totalCount}
           </span>
         </p>
       </div>
