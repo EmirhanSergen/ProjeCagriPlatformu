@@ -17,6 +17,7 @@ const Step1 = React.lazy(() => import('./pages/applicant/Step1_CallInfo'))
 const Step2 = React.lazy(() => import('./pages/applicant/Step2_Upload'))
 const Step3 = React.lazy(() => import('./pages/applicant/Step3_Review'))
 const Step4 = React.lazy(() => import('./pages/applicant/Step4_Submit'))
+const DashboardPage = React.lazy(() => import('./pages/DashboardPage'))
 const CallsPage = React.lazy(() => import('./pages/CallsPage'))
 const CallDetailPage = React.lazy(() => import('./pages/CallDetailPage'))
 const CallManagementPage = React.lazy(() => import('./pages/admin/CallManagementPage'))
@@ -41,6 +42,7 @@ export const appRoutes = [
   { path: '/verify/:token', element: <VerifyEmailPage /> },
   { path: '/password-reset', element: <PasswordResetRequestPage /> },
   { path: '/password-reset/:token', element: <PasswordResetConfirmPage /> },
+  { path: '/dashboard', element: <PrivateRoute><DashboardPage /></PrivateRoute> },
 
   // Applicant
   { path: '/my-applications', element: <PrivateRoute><MyApplicationsPage /></PrivateRoute> },
