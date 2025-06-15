@@ -21,3 +21,4 @@ def accept_invite(db: Session, invite: ReviewerInvite, reviewer_id: int) -> None
     db.add(link)
     db.add(invite)
     db.commit()
+

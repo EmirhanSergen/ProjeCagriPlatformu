@@ -13,6 +13,7 @@ from .review import Review
 from .reviewer_invite import ReviewerInvite  # noqa: F401
 from .call_reviewer import CallReviewer  # noqa: F401
 
+
 __all__ = [
     "Base",
     "User",
@@ -24,4 +25,6 @@ __all__ = [
     "Review",
     "ReviewerInvite",
     "CallReviewer",
+    "ReviewerInviteToken",
+
 ]
