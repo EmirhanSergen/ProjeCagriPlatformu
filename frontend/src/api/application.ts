@@ -199,7 +199,10 @@ export async function assignReviewer(applicationId: number, reviewerId: number):
       },
     }
   )
-  if (!res.ok) throw new Error('Failed to assign reviewer')
+  if (!res.ok) {
+    const err = await res.json().catch(() => null)
+    throw new Error(err?.detail || 'Failed to assign reviewer')
+  }
 }
 
 // 11. Hakem listesini getir (admin için)

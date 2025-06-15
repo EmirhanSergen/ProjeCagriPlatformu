@@ -114,21 +114,31 @@ def get_application_detail(db: Session, application_id: int) -> ApplicationDetai
 
 
 def assign_reviewer(db: Session, application_id: int, reviewer_id: int) -> Application:
-    """Assign a reviewer to an application with many-to-many support."""
+    """Assign a reviewer to an application with many-to-many support.
+
+    Ensures no more than 3 distinct reviewers are assigned to a single
+    application and prevents duplicate assignments.
+    """
+
     application = db.query(Application).filter(Application.id == application_id).first()
     if not application:
         raise ValueError("Application not found")
 
-    # Duplicate kontrolü
+    # Check existing assignments
     existing = db.query(ApplicationReviewer).filter_by(
         application_id=application_id, user_id=reviewer_id
     ).first()
+    if existing:
+        raise ValueError("Reviewer already assigned")
 
-    if not existing:
-        assignment = ApplicationReviewer(application_id=application_id, user_id=reviewer_id)
-        db.add(assignment)
-        db.commit()
-        
+    count = db.query(ApplicationReviewer).filter_by(application_id=application_id).count()
+    if count >= 3:
+        raise ValueError("Maximum number of reviewers reached")
+
+    assignment = ApplicationReviewer(application_id=application_id, user_id=reviewer_id)
+    db.add(assignment)
+    db.commit()
+
     db.refresh(application)
     return application
 

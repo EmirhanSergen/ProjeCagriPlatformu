@@ -36,5 +36,8 @@ export async function updateCall(id: number, data: CallInput): Promise<Call> {
 
 export async function deleteCall(id: number): Promise<void> {
   const res = await fetch(`${API_BASE}/calls/${id}`, { method:'DELETE', headers: authHeaders() })
-  if (!res.ok) throw new Error('Failed to delete call')
+  if (!res.ok) {
+    const err = await res.json().catch(() => null)
+    throw new Error(err?.detail || 'Failed to delete call')
+  }
 }

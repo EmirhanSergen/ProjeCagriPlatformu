@@ -11,6 +11,7 @@ interface Props {
 
 export default function ApplicationCard({ application }: Props) {
   const [reviewers, setReviewers] = useState<User[]>([])
+  const [assigned, setAssigned] = useState<User[]>(application.reviewers || [])
   const [selectedReviewerId, setSelectedReviewerId] = useState<number | null>(null)
   const [assigning, setAssigning] = useState(false)
   const { showToast } = useToast()
@@ -23,14 +24,22 @@ export default function ApplicationCard({ application }: Props) {
     }
   }, [isAdmin])
 
+  useEffect(() => {
+    setAssigned(application.reviewers || [])
+  }, [application.reviewers])
+
   const handleAssign = async () => {
     if (!selectedReviewerId) return
     setAssigning(true)
     try {
       await assignReviewer(application.id, selectedReviewerId)
+      const newReviewer = reviewers.find(r => r.id === selectedReviewerId)
+      if (newReviewer) {
+        setAssigned(prev => [...prev, newReviewer])
+      }
       showToast('Reviewer assigned successfully', 'success')
-    } catch {
-      showToast('Failed to assign reviewer', 'error')
+    } catch (e: any) {
+      showToast(e.message || 'Failed to assign reviewer', 'error')
     } finally {
       setAssigning(false)
     }
@@ -74,46 +83,43 @@ export default function ApplicationCard({ application }: Props) {
       </div>
 
       {isAdmin && (
-        <div className="space-y-3">
-          {assignedReviewers.length > 0 && (
-            <div className="flex flex-wrap items-center gap-2 text-sm text-gray-700">
-              <UserCheck className="w-4 h-4 text-green-700" />
-              <span>Assigned Reviewers:</span>
-              {assignedReviewers.map(r => (
-                <span
-                  key={r.id}
-                  className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded text-xs"
-                >
-                  {r.first_name} {r.last_name}
-                </span>
+        <div className="space-y-2">
+          <p className="text-sm font-medium">Assigned Reviewers:</p>
+          {assigned.length > 0 ? (
+            <ul className="list-disc ml-5 text-sm space-y-1">
+              {assigned.map(r => (
+                <li key={r.id}>{r.first_name} {r.last_name}</li>
               ))}
-            </div>
+            </ul>
+          ) : (
+            <p className="text-sm text-gray-500">None</p>
           )}
 
-          <div>
-            <p className="text-sm font-medium mb-1">Assign Reviewer:</p>
-            <div className="flex flex-wrap gap-2 items-center">
+          {assigned.length < 3 && (
+            <div className="flex gap-2 items-center pt-2">
               <select
-                className="border rounded px-2 py-1 text-sm min-w-[150px]"
+                className="border rounded px-2 py-1 text-sm"
+                onChange={e => setSelectedReviewerId(Number(e.target.value))}
                 value={selectedReviewerId ?? ''}
-                onChange={(e) => setSelectedReviewerId(Number(e.target.value))}
               >
                 <option value="">Select reviewer</option>
-                {reviewers.map((r) => (
-                  <option key={r.id} value={r.id}>
-                    {r.first_name} {r.last_name}
-                  </option>
-                ))}
+                {reviewers
+                  .filter(r => !assigned.some(a => a.id === r.id))
+                  .map(r => (
+                    <option key={r.id} value={r.id}>
+                      {r.first_name} {r.last_name}
+                    </option>
+                  ))}
               </select>
               <button
                 onClick={handleAssign}
-                className="bg-blue-600 text-white text-sm px-3 py-1.5 rounded hover:bg-blue-700 transition disabled:opacity-50"
+                className="bg-blue-600 text-white text-sm px-3 py-1 rounded hover:bg-blue-700 transition"
                 disabled={assigning || !selectedReviewerId}
               >
                 {assigning ? 'Assigning...' : 'Assign'}
               </button>
             </div>
-          </div>
+          )}
         </div>
       )}
     </div>
