@@ -29,6 +29,11 @@ function Navbar() {
               Manage Calls
             </Link>
           )}
+          {token && role === 'reviewer' && (
+            <Link to="/reviewer" className="hover:underline">
+              My Reviews
+            </Link>
+          )}
         </div>
 
         {/* Auth buttons */}
