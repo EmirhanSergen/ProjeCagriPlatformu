@@ -59,24 +59,44 @@ def confirm_documents(db: Session, application: Application) -> Application:
     return application
 
 
+def _build_application_detail(db: Session, app: Application) -> ApplicationDetail:
+    """Helper to convert an Application model to ApplicationDetail"""
+    return ApplicationDetail(
+        id=app.id,
+        user_id=app.user_id,
+        call_id=app.call_id,
+        content=app.content,
+        documents_confirmed=attachments_confirmed(db, app.id),
+        user_email=app.user.email if app.user else "",
+        attachments=get_attachments_by_application(db, app.id),
+        reviewers=[
+            ReviewerShort(id=r.user.id, name=f"{r.user.first_name} {r.user.last_name}")
+            for r in getattr(app, "review_assignments", [])
+            if r.user
+        ],
+    )
+
+
 def get_applications_by_call(db: Session, call_id: int) -> list[ApplicationDetail]:
     applications = db.query(Application).options(
         joinedload(Application.review_assignments).joinedload(ApplicationReviewer.user)
     ).filter(Application.call_id == call_id).all()
     result = []
     for app in applications:
-        detail = ApplicationDetail(
-            id=app.id,
-            user_id=app.user_id,
-            call_id=app.call_id,
-            content=app.content,
-            documents_confirmed=attachments_confirmed(db, app.id),
-            user_email=app.user.email if app.user else "",
-            attachments=get_attachments_by_application(db, app.id),
-            reviewers=[ReviewerShort(id=r.user.id, name=f"{r.user.first_name} {r.user.last_name}") for r in getattr(app, "review_assignments", [])]  # Opsiyonel: review_assignments ilişkisi varsa
-        )
-        result.append(detail)
+        result.append(_build_application_detail(db, app))
     return result
+
+
+def get_application_detail(db: Session, application_id: int) -> ApplicationDetail | None:
+    app = (
+        db.query(Application)
+        .options(joinedload(Application.review_assignments).joinedload(ApplicationReviewer.user))
+        .filter(Application.id == application_id)
+        .first()
+    )
+    if not app:
+        return None
+    return _build_application_detail(db, app)
 
 
 def assign_reviewer(db: Session, application_id: int, reviewer_id: int) -> Application:

@@ -7,6 +7,7 @@ import os, uuid
 from app.dependencies import get_db
 from ..dependencies import get_current_user, get_current_admin, get_current_admin_or_reviewer
 from ..models.application import Application, ApplicationStatus
+from ..models.user import User
 from ..models.document import DocumentDefinition
 from ..models.attachment import Attachment
 from ..schemas.application import ApplicationCreate, ApplicationOut, ApplicationDetail
@@ -17,6 +18,7 @@ from ..crud.application import (
     get_application_by_user_and_call,
     get_application_for_user,
     get_applications_by_call,
+    get_application_detail,
     get_applications_by_user,
     delete_application_by_id,
     assign_reviewer,
@@ -316,3 +318,16 @@ async def assign_reviewer_route(
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
     return {"detail": f"Reviewer {reviewer_id} assigned", "application_id": application_id}
+
+
+# Admin/Reviewer: Get application details
+@router.get("/{application_id}/details", response_model=ApplicationDetail)
+def get_application_details(
+    application_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_or_reviewer),
+):
+    application = get_application_detail(db, application_id)
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+    return application
