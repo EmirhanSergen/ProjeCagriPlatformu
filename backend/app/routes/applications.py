@@ -242,10 +242,22 @@ def confirm_application_files(
     application = get_application_for_user(db, application_id, current_user.id)
     if not application:
         raise HTTPException(status_code=404, detail="Application not found")
-    if not get_attachments_by_application(db, application.id):
+    attachments = get_attachments_by_application(db, application.id)
+    if not attachments:
         raise HTTPException(status_code=400, detail="No attachments to confirm")
     if attachments_confirmed(db, application.id):
         raise HTTPException(status_code=400, detail="Attachments already confirmed")
+
+    required_defs = (
+        db.query(DocumentDefinition)
+        .filter(DocumentDefinition.call_id == application.call_id)
+        .all()
+    )
+    attached_doc_ids = {att.document_id for att in attachments if att.document_id}
+    missing = [d for d in required_defs if d.id not in attached_doc_ids]
+    if missing:
+        raise HTTPException(status_code=400, detail="Missing required documents")
+
     confirm_attachments(db, application.id)
     confirm_documents(db, application)
     return {"detail": "Attachments confirmed"}
