@@ -4,7 +4,7 @@ import { fetchApplicationDetails, downloadAttachment } from '../../api'
 import type { ApplicationDetail, Attachment } from '../../api'
 import { downloadBlob } from '../../lib/download'
 import { useToast } from '../../components/ToastProvider'
-import { useAuth } from '../../context/AuthContext' // yolu senin yapına göre `components/AuthProvider` da olabilir
+import { useAuth } from '../../components/AuthProvider'
 
 export default function ApplicationDetailPage() {
   const { applicationId } = useParams<{ applicationId: string }>()
