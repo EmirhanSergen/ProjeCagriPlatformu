@@ -74,7 +74,7 @@ export default function ReviewDashboard() {
     .filter(
       a =>
         a.callTitle.toLowerCase().includes(search.toLowerCase()) ||
-        a.user_email.toLowerCase().includes(search.toLowerCase())
+        a.user.email.toLowerCase().includes(search.toLowerCase())
     )
 
   return (
@@ -114,11 +114,11 @@ export default function ReviewDashboard() {
               <TableRow key={app.id} className={idx % 2 ? 'bg-gray-50' : ''}>
                 <TableCell>{app.callTitle}</TableCell>
                 <TableCell>
-                  {app.user_first_name || app.user_last_name
-                    ? `${app.user_first_name ?? ''} ${app.user_last_name ?? ''}`.trim()
+                  {app.user.first_name || app.user.last_name
+                    ? `${app.user.first_name ?? ''} ${app.user.last_name ?? ''}`.trim()
                     : '-'}
                 </TableCell>
-                <TableCell>{app.user_email}</TableCell>
+                <TableCell>{app.user.email}</TableCell>
                 <TableCell>
                   {app.created_at ? format(new Date(app.created_at), 'yyyy-MM-dd') : '-'}
                 </TableCell>

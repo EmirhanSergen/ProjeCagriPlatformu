@@ -57,7 +57,7 @@ export default function ApplicationDetailPage() {
           <div className="flex items-center gap-2">
             <span>🧑</span>
             <strong>Applicant:</strong>{' '}
-            {application.user_first_name} {application.user_last_name} ({application.user_email})
+            {application.user.first_name} {application.user.last_name} ({application.user.email})
           </div>
           <div className="flex items-center gap-2">
             <span>🗓️</span>

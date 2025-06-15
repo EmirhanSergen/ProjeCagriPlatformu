@@ -1,5 +1,6 @@
 from pydantic import BaseModel, ConfigDict
 from .attachment import AttachmentOut
+from .user import UserOut
 from datetime import datetime
 
 
@@ -34,9 +35,7 @@ class ApplicationDetail(BaseModel):
     call_id: int
     content: str
     documents_confirmed: bool   # Whether the user confirmed their documents
-    user_email: str      # Pulled from the User table via JOIN
-    user_first_name: str | None = None
-    user_last_name: str | None = None
+    user: UserOut
     created_at: datetime
     attachments: list[AttachmentOut]  # List of uploaded documents
     reviewers: list[ReviewerShort]

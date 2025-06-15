@@ -44,7 +44,7 @@ export default function ApplicationCard({ application }: Props) {
     <li className="border rounded-lg p-4 shadow-sm bg-white space-y-4">
       <div className="space-y-1">
         <p className="text-sm text-gray-500">Application ID: {application.id}</p>
-        <h2 className="text-lg font-semibold text-gray-800">{application.user_email}</h2>
+        <h2 className="text-lg font-semibold text-gray-800">{application.user.email}</h2>
         <p className="text-sm text-gray-600">
           Documents Confirmed:{' '}
           <span
