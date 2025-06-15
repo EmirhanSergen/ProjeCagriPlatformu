@@ -39,8 +39,8 @@ function Navbar() {
             </button>
           ) : (
             <>
-              <Link to="/login" className="bg-blue-500 px-3 py-1 rounded">Login</Link>
-              <Link to="/register" className="bg-green-500 px-3 py-1 rounded">Sign Up</Link>
+              <Link to="/auth" className="bg-blue-500 px-3 py-1 rounded">Login</Link>
+              <Link to="/auth" className="bg-green-500 px-3 py-1 rounded">Sign Up</Link>
             </>
           )}
         </div>

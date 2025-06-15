@@ -1,12 +1,10 @@
 // src/components/LoginForm.tsx
 import { useForm } from 'react-hook-form'
-import { useState } from 'react'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { login as apiLogin } from '../api'
 import type { LoginData } from '../api'
 import { useToast } from './ToastProvider'
-import RoleSlider from './RoleSlider'
 import type { Role } from './RoleSlider'
 import { useAuth } from './AuthProvider'
 
@@ -16,17 +14,17 @@ const schema = z.object({
 })
 
 interface Props {
+  role: Role
   onSuccess?: (role: Role) => void
 }
 
-export default function LoginForm({ onSuccess }: Props) {
+export default function LoginForm({ role, onSuccess }: Props) {
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<Omit<LoginData, 'role'>>({ resolver: zodResolver(schema) })
   const { showToast } = useToast()
-  const [role, setRole] = useState<Role>('applicant')
   const { login } = useAuth()
 
   const onSubmit = handleSubmit(async (data) => {
@@ -51,8 +49,6 @@ export default function LoginForm({ onSuccess }: Props) {
   return (
     <form onSubmit={onSubmit} className="space-y-6">
       <p className="text-center text-lg">Login</p>
-
-      <RoleSlider value={role} onChange={setRole} />
 
       <div>
         <label htmlFor="login-email" className="block text-sm font-medium text-gray-700">

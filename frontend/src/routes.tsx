@@ -7,6 +7,7 @@ const HomePage = React.lazy(() => import('./pages/HomePage'))
 const AboutPage = React.lazy(() => import('./pages/AboutPage'))
 const RegisterPage = React.lazy(() => import('./pages/RegisterPage'))
 const LoginPage = React.lazy(() => import('./pages/LoginPage'))
+const AuthLandingPage = React.lazy(() => import('./pages/AuthLandingPage'))
 const VerifyEmailPage = React.lazy(() => import('./pages/VerifyEmailPage'))
 const PasswordResetRequestPage = React.lazy(() => import('./pages/PasswordResetRequestPage'))
 const PasswordResetConfirmPage = React.lazy(() => import('./pages/PasswordResetConfirmPage'))
@@ -30,8 +31,11 @@ export const appRoutes = [
   // Public
   { path: '/', element: <HomePage /> },
   { path: '/about', element: <AboutPage /> },
-  { path: '/register', element: <RegisterPage /> },
-  { path: '/login', element: <LoginPage /> },
+  { path: '/auth', element: <AuthLandingPage /> },
+  { path: '/register/:role', element: <RegisterPage /> },
+  { path: '/register', element: <Navigate to="/auth" replace /> },
+  { path: '/login/:role', element: <LoginPage /> },
+  { path: '/login', element: <Navigate to="/auth" replace /> },
   { path: '/verify/:token', element: <VerifyEmailPage /> },
   { path: '/password-reset', element: <PasswordResetRequestPage /> },
   { path: '/password-reset/:token', element: <PasswordResetConfirmPage /> },
