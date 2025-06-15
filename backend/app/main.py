@@ -16,6 +16,7 @@ from .routes import (
     user_router,
     auth_router,
     review_router,
+    reviewer_invite_router,
 )
 
 # Configure root logger
@@ -93,3 +94,4 @@ app.include_router(call_router)
 app.include_router(application_router)
 app.include_router(document_router)
 app.include_router(review_router)
+app.include_router(reviewer_invite_router)
