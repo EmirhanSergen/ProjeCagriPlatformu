@@ -76,6 +76,7 @@ def _build_application_detail(db: Session, app: Application) -> ApplicationDetai
         user_id=app.user_id,
         call_id=app.call_id,
         content=app.content,
+        status=app.status,
         created_at=app.created_at,
         documents_confirmed=attachments_confirmed(db, app.id),
         user=app.user,

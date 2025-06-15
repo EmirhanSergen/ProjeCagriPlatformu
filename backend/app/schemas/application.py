@@ -34,6 +34,7 @@ class ApplicationDetail(BaseModel):
     user_id: int
     call_id: int
     content: str
+    status: str
     documents_confirmed: bool   # Whether the user confirmed their documents
     user: UserOut
     created_at: datetime
