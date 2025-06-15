@@ -65,17 +65,3 @@ export async function deleteReview(id: number): Promise<void> {
   })
   if (!res.ok) throw new Error('Failed to delete review')
 }
-
-// Reviewer downloads an attachment for review
-export async function downloadAttachmentForReview(
-  attachmentId: number
-): Promise<Blob> {
-  const res = await fetch(
-    `${API_BASE}/attachments/${attachmentId}/download`,
-    {
-      headers: { ...authHeaders() },
-    }
-  )
-  if (!res.ok) throw new Error('Failed to download attachment')
-  return res.blob()
-}
