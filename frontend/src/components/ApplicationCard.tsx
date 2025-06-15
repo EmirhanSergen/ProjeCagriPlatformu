@@ -1,4 +1,4 @@
-import type { ApplicationDetail, User } from '../api'
+import type { ApplicationDetail, User, ReviewerShort } from '../api'
 import { assignReviewer, fetchReviewers } from '../api'
 import { useEffect, useState } from 'react'
 import { useToast } from './ToastProvider'
@@ -11,7 +11,7 @@ interface Props {
 
 export default function ApplicationCard({ application }: Props) {
   const [reviewers, setReviewers] = useState<User[]>([])
-  const [assigned, setAssigned] = useState<User[]>(application.reviewers || [])
+  const [assigned, setAssigned] = useState<ReviewerShort[]>(application.reviewers || [])
   const [selectedReviewerId, setSelectedReviewerId] = useState<number | null>(null)
   const [assigning, setAssigning] = useState(false)
   const { showToast } = useToast()
@@ -33,7 +33,14 @@ export default function ApplicationCard({ application }: Props) {
     try {
       await assignReviewer(application.id, selectedReviewerId)
       const newReviewer = reviewers.find(r => r.id === selectedReviewerId)
-      if (newReviewer) setAssigned(prev => [...prev, newReviewer])
+      if (newReviewer) {
+        const short: ReviewerShort = {
+          id: newReviewer.id,
+          first_name: newReviewer.first_name,
+          last_name: newReviewer.last_name,
+        }
+        setAssigned(prev => [...prev, short])
+      }
       showToast('Reviewer assigned successfully', 'success')
     } catch (e: any) {
       showToast(e.message || 'Failed to assign reviewer', 'error')

@@ -82,7 +82,11 @@ def _build_application_detail(db: Session, app: Application) -> ApplicationDetai
         user=app.user,
         attachments=get_attachments_by_application(db, app.id),
         reviewers=[
-            ReviewerShort(id=r.user.id, name=f"{r.user.first_name} {r.user.last_name}")
+            ReviewerShort(
+                id=r.user.id,
+                first_name=r.user.first_name,
+                last_name=r.user.last_name,
+            )
             for r in getattr(app, "review_assignments", [])
             if r.user
         ],

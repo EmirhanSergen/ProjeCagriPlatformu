@@ -9,6 +9,7 @@ import {
   type ApplicationDetail,
   type ReviewOut,
   type User,
+  type ReviewerShort,
 } from '../../api'
 import { useToast } from '../../components/ToastProvider'
 import {
@@ -49,7 +50,7 @@ export default function ReviewDashboard() {
           try {
             const list = await fetchApplications(call.id)
             list.forEach(app => {
-              if (app.reviewers?.some((r: User) => r.id == myId)) {
+              if (app.reviewers?.some((r: ReviewerShort) => r.id == myId)) {
                 results.push({ ...app, callTitle: call.title })
               }
             })

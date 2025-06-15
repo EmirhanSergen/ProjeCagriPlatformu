@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { fetchApplications } from '../../api'
-import type { ApplicationDetail, User } from '../../api'
+import type { ApplicationDetail, User, ReviewerShort } from '../../api'
 import ApplicationCard from '../../components/ApplicationCard'
 import { Input } from '../../components/ui/Input'
 import { Select } from '../../components/ui/Select'
@@ -26,7 +26,9 @@ export default function CallApplicationsPage() {
           const token = localStorage.getItem('token')
           if (!token) return
           const myId = JSON.parse(atob(token.split('.')[1])).sub
-          const filtered = apps.filter(app => app.reviewers?.some((r: User) => r.id == myId))
+          const filtered = apps.filter((app) =>
+            app.reviewers?.some((r: ReviewerShort) => r.id == myId)
+          )
           setApplications(filtered)
           setFiltered(filtered)
         } else {
