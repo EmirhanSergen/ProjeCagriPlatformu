@@ -11,8 +11,8 @@ import { Link } from 'react-router-dom'
 const schema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
-  firstName: z.string().min(1, 'First name is required'),
-  lastName: z.string().min(1, 'Last name is required'),
+  first_name: z.string().min(1, 'First name is required'),
+  last_name: z.string().min(1, 'Last name is required'),
   organization: z.string().min(1, 'Organization is required'),
 })
 
@@ -70,11 +70,13 @@ export default function RegisterForm({ role, onSuccess }: Props) {
         <label htmlFor="first_name" className="block text-sm font-medium text-gray-700">First Name</label>
         <input
           id="first_name"
-          {...register('firstName')}
+          {...register('first_name')}
           disabled={isSubmitting}
           className="mt-1 block w-full border rounded px-4 py-3"
         />
-        {errors.firstName && <p className="text-sm text-red-600">{errors.firstName.message}</p>}
+        {errors.first_name && (
+          <p className="text-sm text-red-600">{errors.first_name.message}</p>
+        )}
       </div>
 
       {/* Last Name */}
@@ -82,11 +84,13 @@ export default function RegisterForm({ role, onSuccess }: Props) {
         <label htmlFor="last_name" className="block text-sm font-medium text-gray-700">Last Name</label>
         <input
           id="last_name"
-          {...register('lastName')}
+          {...register('last_name')}
           disabled={isSubmitting}
           className="mt-1 block w-full border rounded px-4 py-3"
         />
-        {errors.lastName && <p className="text-sm text-red-600">{errors.lastName.message}</p>}
+        {errors.last_name && (
+          <p className="text-sm text-red-600">{errors.last_name.message}</p>
+        )}
       </div>
 
       {/* Organization */}

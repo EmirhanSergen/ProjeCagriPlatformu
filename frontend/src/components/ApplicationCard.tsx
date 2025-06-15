@@ -67,7 +67,7 @@ export default function ApplicationCard({ application }: Props) {
               <option value="">Select reviewer</option>
               {reviewers.map((r) => (
                 <option key={r.id} value={r.id}>
-                  {r.firstName} {r.lastName}
+                  {r.first_name} {r.last_name}
                 </option>
               ))}
             </select>
