@@ -3,7 +3,7 @@ import { assignReviewer, fetchReviewers } from '../api'
 import { useEffect, useState } from 'react'
 import { useToast } from './ToastProvider'
 import { Link } from 'react-router-dom'
-import { FileText } from 'lucide-react'
+import { FileText, Loader2, PlusCircle } from 'lucide-react'
 
 interface Props {
   application: ApplicationDetail
@@ -15,7 +15,6 @@ export default function ApplicationCard({ application }: Props) {
   const [selectedReviewerId, setSelectedReviewerId] = useState<number | null>(null)
   const [assigning, setAssigning] = useState(false)
   const { showToast } = useToast()
-
   const isAdmin = localStorage.getItem('role') === 'admin'
 
   useEffect(() => {
@@ -34,9 +33,7 @@ export default function ApplicationCard({ application }: Props) {
     try {
       await assignReviewer(application.id, selectedReviewerId)
       const newReviewer = reviewers.find(r => r.id === selectedReviewerId)
-      if (newReviewer) {
-        setAssigned(prev => [...prev, newReviewer])
-      }
+      if (newReviewer) setAssigned(prev => [...prev, newReviewer])
       showToast('Reviewer assigned successfully', 'success')
     } catch (e: any) {
       showToast(e.message || 'Failed to assign reviewer', 'error')
@@ -49,24 +46,17 @@ export default function ApplicationCard({ application }: Props) {
   const totalCount = application.attachments?.length || 0
 
   return (
-    <li className="border rounded-lg p-4 shadow-sm bg-white space-y-4">
-      <div className="flex justify-between items-center">
-        <div className="space-y-1">
-          <p className="text-xs text-gray-500">Application ID: {application.id}</p>
-          <h2 className="text-base font-semibold text-gray-800">
-            {application.user?.first_name} {application.user?.last_name}
-          </h2>
-          <p className="text-sm text-gray-600">{application.user?.organization}</p>
-          <h2 className="text-base font-semibold text-gray-800">{application.user.email}</h2>
-          <p className="text-sm text-gray-600">
-            Documents Confirmed:{' '}
-            <span
-              className={
-                confirmedCount === totalCount && totalCount > 0
-                  ? 'text-green-700 font-medium'
-                  : 'text-red-600 font-medium'
-              }
-            >
+    <li className="border rounded-xl p-5 shadow-sm bg-white space-y-4">
+      {/* Üst bilgi */}
+      <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
+        <div className="space-y-1 text-sm text-gray-800">
+          <p><span className="text-gray-500">📄 ID:</span> {application.id}</p>
+          <p><span className="text-gray-500">👤 Name:</span> {application.user.first_name} {application.user.last_name}</p>
+          <p><span className="text-gray-500">🏢 Org:</span> {application.user.organization || '—'}</p>
+          <p><span className="text-gray-500">✉️ Email:</span> {application.user.email}</p>
+          <p>
+            <span className="text-gray-500">📎 Confirmed:</span>{' '}
+            <span className={`font-semibold ${confirmedCount === totalCount ? 'text-green-600' : 'text-red-600'}`}>
               {confirmedCount}/{totalCount}
             </span>
           </p>
@@ -74,24 +64,28 @@ export default function ApplicationCard({ application }: Props) {
 
         <Link
           to={`/admin/calls/${application.call_id}/applications/${application.id}`}
-          className="inline-flex items-center text-sm text-blue-600 hover:underline"
+          className="inline-flex items-center gap-1 text-blue-600 hover:underline text-sm"
         >
-          <FileText className="w-4 h-4 mr-1" /> View Full
+          <FileText className="w-4 h-4" />
+          View Details
         </Link>
       </div>
 
+      {/* Reviewer listesi + atama */}
       {isAdmin && (
-        <div className="space-y-2">
+        <div className="space-y-2 pt-2">
           <p className="text-sm font-medium">Assigned Reviewers:</p>
-          {assigned.length > 0 ? (
-            <ul className="list-disc ml-5 text-sm space-y-1">
-              {assigned.map(r => (
-                <li key={r.id}>{r.first_name} {r.last_name}</li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-sm text-gray-500">None</p>
-          )}
+          <div className="flex flex-wrap gap-2">
+            {assigned.length > 0 ? (
+              assigned.map(r => (
+                <span key={r.id} className="inline-block bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-700">
+                  {r.first_name} {r.last_name}
+                </span>
+              ))
+            ) : (
+              <p className="text-sm text-gray-500">None</p>
+            )}
+          </div>
 
           {assigned.length < 3 && (
             <div className="flex gap-2 items-center pt-2">
@@ -111,10 +105,11 @@ export default function ApplicationCard({ application }: Props) {
               </select>
               <button
                 onClick={handleAssign}
-                className="bg-blue-600 text-white text-sm px-3 py-1 rounded hover:bg-blue-700 transition"
+                className="flex items-center gap-1 bg-blue-600 text-white text-sm px-3 py-1.5 rounded hover:bg-blue-700 transition disabled:opacity-50"
                 disabled={assigning || !selectedReviewerId}
               >
-                {assigning ? 'Assigning...' : 'Assign'}
+                {assigning ? <Loader2 className="w-4 h-4 animate-spin" /> : <PlusCircle className="w-4 h-4" />}
+                Assign
               </button>
             </div>
           )}

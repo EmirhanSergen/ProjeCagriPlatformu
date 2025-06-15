@@ -46,29 +46,42 @@ export default function Step3_Review() {
     setConfirming(true)
     try {
       await confirmDocuments(application.id)
-      showToast('Documents confirmed', 'success')
+      showToast('✅ Documents confirmed', 'success')
     } catch {
-      showToast('Failed to confirm documents', 'error')
+      showToast('❌ Failed to confirm documents', 'error')
     } finally {
       setConfirming(false)
     }
   }
 
-  if (loading) return <p className="p-4">Loading...</p>
+  const getDisplayFileName = (fileName: string) => {
+    const parts = fileName.split('_')
+    const lastPart = parts[parts.length - 1]
+    return lastPart || fileName
+  }
+
+  if (loading) return <p className="p-6 text-gray-600">Loading documents…</p>
 
   return (
-    <div className="space-y-6 p-4">
-      <h1 className="text-xl font-bold">Review Your Uploaded Documents</h1>
+    <div className="max-w-4xl mx-auto p-6 space-y-6">
+      <h1 className="text-2xl font-bold text-gray-800">📁 Review Uploaded Documents</h1>
+      <p className="text-sm text-gray-600">
+        Below are the documents required for this call. Ensure each one has an uploaded file.
+      </p>
 
       {documents.map(doc => {
         const files = attachments.filter(att => att.document_id === doc.id)
         return (
-          <div key={doc.id} className="border p-4 rounded shadow-sm bg-white">
-            <h2 className="font-semibold text-gray-800">{doc.name}</h2>
+          <div
+            key={doc.id}
+            className="border border-gray-200 rounded-lg shadow-sm bg-white p-5 space-y-2"
+          >
+            <h2 className="text-lg font-semibold text-gray-800">📌 {doc.name}</h2>
             <p className="text-sm text-gray-600">{doc.description}</p>
-            <ul className="mt-2 list-disc list-inside text-sm">
-              {files.length > 0 ? (
-                files.map(file => (
+
+            {files.length > 0 ? (
+              <ul className="list-disc list-inside text-sm text-blue-700">
+                {files.map(file => (
                   <li key={file.id}>
                     <button
                       onClick={async () => {
@@ -79,27 +92,29 @@ export default function Step3_Review() {
                           showToast('Failed to download file', 'error')
                         }
                       }}
-                      className="text-blue-600 underline"
+                      className="hover:underline"
                     >
-                      {file.file_name}
+                      {getDisplayFileName(file.file_name)}
                     </button>
                   </li>
-                ))
-              ) : (
-                <li className="text-red-600">No file uploaded</li>
-              )}
-            </ul>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-red-600 italic">No file uploaded.</p>
+            )}
           </div>
         )
       })}
 
-      <Button
-        onClick={handleConfirm}
-        className="mt-6"
-        disabled={confirming}
-      >
-        {confirming ? 'Confirming…' : 'Confirm Documents'}
-      </Button>
+      <div className="pt-4">
+        <Button
+          onClick={handleConfirm}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+          disabled={confirming}
+        >
+          {confirming ? 'Confirming…' : '✅ Confirm All Documents'}
+        </Button>
+      </div>
     </div>
   )
 }
