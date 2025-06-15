@@ -1,6 +1,7 @@
 import type { Attachment } from '../api'
 import { downloadAttachmentForReview } from '../api'
 import { downloadBlob } from '../lib/download'
+import { getDisplayFileName } from '../lib/file'
 
 
 interface Props {
@@ -23,7 +24,7 @@ export default function AttachmentList({ attachments }: Props) {
             }}
             className="text-blue-600 underline"
           >
-            {a.file_name}
+            {getDisplayFileName(a.file_name)}
           </button>
         </li>
       ))}

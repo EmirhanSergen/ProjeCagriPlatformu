@@ -11,6 +11,7 @@ import {
 } from '../../api'
 import { useToast } from '../../components/ToastProvider'
 import { downloadBlob } from '../../lib/download'
+import { getDisplayFileName } from '../../lib/file'
 
 export default function ReviewApplicationPage() {
   const { applicationId } = useParams<{ applicationId: string }>()
@@ -115,7 +116,7 @@ export default function ReviewApplicationPage() {
                 >
                   Download
                 </button>
-                <span className="ml-2">{att.file_name}</span>
+                <span className="ml-2">{getDisplayFileName(att.file_name)}</span>
               </li>
             ))}
           </ul>

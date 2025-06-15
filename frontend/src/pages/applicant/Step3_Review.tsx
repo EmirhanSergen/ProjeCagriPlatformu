@@ -13,6 +13,7 @@ import {
 import { Button } from '../../components/ui/Button'
 import { useToast } from '../../components/ToastProvider'
 import { downloadBlob } from '../../lib/download'
+import { getDisplayFileName } from '../../lib/file'
 
 export default function Step3_Review() {
   const { callId } = useParams<{ callId: string }>()
