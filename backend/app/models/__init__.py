@@ -10,6 +10,7 @@ from .attachment import Attachment  # noqa: F401
 from .document import DocumentDefinition  # noqa: F401
 from .application_reviewer import ApplicationReviewer  # noqa: F401
 from .review import Review
+from .reviewer_invite_token import ReviewerInviteToken  # noqa: F401
 
 __all__ = [
     "Base",
@@ -20,4 +21,5 @@ __all__ = [
     "DocumentDefinition",
     "ApplicationReviewer",
     "Review",
+    "ReviewerInviteToken",
 ]
