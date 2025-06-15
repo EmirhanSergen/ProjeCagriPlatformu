@@ -45,7 +45,7 @@ export default function CallApplicationsPage() {
   useEffect(() => {
     const lower = search.toLowerCase()
     const filteredList = applications.filter((app) =>
-      app.user_email.toLowerCase().includes(lower) ||
+      app.user.email.toLowerCase().includes(lower) ||
       app.user?.first_name?.toLowerCase().includes(lower) ||
       app.user?.last_name?.toLowerCase().includes(lower) ||
       app.user?.organization?.toLowerCase().includes(lower)

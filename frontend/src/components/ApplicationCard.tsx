@@ -79,8 +79,7 @@ export default function ApplicationCard({ application }: Props) {
             {application.user?.first_name} {application.user?.last_name}
           </h2>
           <p className="text-sm text-gray-600">{application.user?.organization}</p>
-          <p className="text-xs text-gray-500">{application.user_email}</p>
-          <h2 className="text-base font-semibold text-gray-800">{application.user_email}</h2>
+          <h2 className="text-base font-semibold text-gray-800">{application.user.email}</h2>
           <p className="text-sm text-gray-600">
             Documents Confirmed:{' '}
             <span
@@ -143,6 +142,6 @@ export default function ApplicationCard({ application }: Props) {
           )}
         </div>
       )}
-    </div>
+    </li>
   )
 }

@@ -40,7 +40,6 @@ export interface ApplicationDetail extends Application {
   documents_confirmed: boolean
   attachments: Attachment[]
   reviewers?: User[]
-  user?: User
 }
 
 // 1. Başvuru oluştur
