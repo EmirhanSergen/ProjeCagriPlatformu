@@ -27,6 +27,7 @@ const CallDocumentsPage = React.lazy(() => import('./pages/admin/CallDocumentsPa
 const CallApplicationsPage = React.lazy(() => import('./pages/reviewer/CallApplicationsPage'))
 const ReviewDashboard = React.lazy(() => import('./pages/reviewer/ReviewDashboard'))
 const ReviewApplicationPage = React.lazy(() => import('./pages/reviewer/ReviewApplicationPage'))
+const ReviewerLinkPage = React.lazy(() => import('./pages/reviewer/ReviewerLinkPage'))
 const ApplicationDetailPage = React.lazy(() => import('./pages/admin/ApplicationDetailPage'))
 const NotFoundPage = React.lazy(() => import('./pages/NotFoundPage'))
 
@@ -39,6 +40,7 @@ export const appRoutes = [
   { path: '/register', element: <Navigate to="/auth" replace /> },
   { path: '/login/:role', element: <LoginPage /> },
   { path: '/login', element: <Navigate to="/auth" replace /> },
+  { path: '/reviewer/link', element: <ReviewerLinkPage /> },
   { path: '/verify/:token', element: <VerifyEmailPage /> },
   { path: '/password-reset', element: <PasswordResetRequestPage /> },
   { path: '/password-reset/:token', element: <PasswordResetConfirmPage /> },
