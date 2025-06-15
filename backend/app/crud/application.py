@@ -76,8 +76,11 @@ def _build_application_detail(db: Session, app: Application) -> ApplicationDetai
         user_id=app.user_id,
         call_id=app.call_id,
         content=app.content,
+        created_at=app.created_at,
         documents_confirmed=attachments_confirmed(db, app.id),
         user_email=app.user.email if app.user else "",
+        user_first_name=app.user.first_name if app.user else None,
+        user_last_name=app.user.last_name if app.user else None,
         attachments=get_attachments_by_application(db, app.id),
         reviewers=[
             ReviewerShort(id=r.user.id, name=f"{r.user.first_name} {r.user.last_name}")
