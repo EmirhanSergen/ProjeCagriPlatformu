@@ -3,7 +3,7 @@ import { assignReviewer, fetchReviewers } from '../api'
 import { useEffect, useState } from 'react'
 import { useToast } from './ToastProvider'
 import { Link } from 'react-router-dom'
-import { FileText, UserCheck } from 'lucide-react'
+import { FileText } from 'lucide-react'
 
 interface Props {
   application: ApplicationDetail
@@ -47,31 +47,9 @@ export default function ApplicationCard({ application }: Props) {
 
   const confirmedCount = application.attachments?.filter(a => a.is_confirmed).length || 0
   const totalCount = application.attachments?.length || 0
-  const assignedReviewers = application.reviewers || []
 
   return (
     <li className="border rounded-lg p-4 shadow-sm bg-white space-y-4">
-      <div className="space-y-1">
-        <p className="text-sm text-gray-500">Application ID: {application.id}</p>
-        <h2 className="text-lg font-semibold text-gray-800">
-          {application.user.first_name || application.user.last_name
-            ? `${application.user.first_name ?? ''} ${application.user.last_name ?? ''}`.trim()
-            : application.user.email}
-          {(application.user.first_name || application.user.last_name) && ` (${application.user.email})`}
-        </h2>
-        <p className="text-sm text-gray-600">
-          Documents Confirmed:{' '}
-          <span
-            className={
-              confirmedCount === totalCount && totalCount > 0
-                ? 'text-green-700'
-                : 'text-red-600'
-            }
-          >
-            {confirmedCount}/{totalCount}
-          </span>
-        </p>
-      </div>
       <div className="flex justify-between items-center">
         <div className="space-y-1">
           <p className="text-xs text-gray-500">Application ID: {application.id}</p>
