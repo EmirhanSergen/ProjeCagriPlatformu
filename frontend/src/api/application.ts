@@ -34,12 +34,18 @@ export interface User {
   organization?: string
 }
 
+export interface ReviewerShort {
+  id: number
+  first_name?: string
+  last_name?: string
+}
+
 export interface ApplicationDetail extends Application {
   user: User
   created_at: string
   documents_confirmed: boolean
   attachments: Attachment[]
-  reviewers?: User[]
+  reviewers?: ReviewerShort[]
 }
 
 // 1. Başvuru oluştur

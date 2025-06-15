@@ -25,7 +25,9 @@ class ApplicationOut(BaseModel):
 
 class ReviewerShort(BaseModel):
     id: int
-    name: str  # veya email
+    first_name: str | None = None
+    last_name: str | None = None
+
     model_config = ConfigDict(from_attributes=True)
 
 # Detailed schema for one application with user and attachment info
