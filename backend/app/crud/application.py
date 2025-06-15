@@ -92,6 +92,7 @@ def _build_application_detail(db: Session, app: Application) -> ApplicationDetai
 
 def get_applications_by_call(db: Session, call_id: int) -> list[ApplicationDetail]:
     applications = db.query(Application).options(
+        joinedload(Application.user),
         joinedload(Application.review_assignments).joinedload(ApplicationReviewer.user)
     ).filter(Application.call_id == call_id).all()
     result = []
@@ -103,7 +104,7 @@ def get_applications_by_call(db: Session, call_id: int) -> list[ApplicationDetai
 def get_application_detail(db: Session, application_id: int) -> ApplicationDetail | None:
     app = (
         db.query(Application)
-        .options(joinedload(Application.review_assignments).joinedload(ApplicationReviewer.user))
+        .options( joinedload(Application.user),joinedload(Application.review_assignments).joinedload(ApplicationReviewer.user))
         .filter(Application.id == application_id)
         .first()
     )
