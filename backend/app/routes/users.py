@@ -7,7 +7,7 @@ from jose import jwt
 
 from app.dependencies import get_db
 from ..dependencies import get_current_user, get_current_admin
-from ..models.user import User as UserModel
+from ..models.user import User as UserModel, UserRole
 from ..schemas.user import (
     UserCreate,
     UserOut,
@@ -134,6 +134,14 @@ def list_users(
     current_admin = Depends(get_current_admin),
 ):
     return db.query(UserModel).all()
+
+
+@router.get("/admin/reviewers", response_model=list[UserOut])
+def list_reviewers(
+    db: Session = Depends(get_db),
+    current_admin = Depends(get_current_admin)
+):
+    return db.query(UserModel).filter(UserModel.role == UserRole.REVIEWER).all()
 
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
