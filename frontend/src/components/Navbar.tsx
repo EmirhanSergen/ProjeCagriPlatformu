@@ -1,27 +1,57 @@
-import React from 'react'
 import { Link } from 'react-router-dom'
+import { useAuth } from './AuthProvider'
 
 function Navbar() {
+  const { token, role, logout } = useAuth()
+
   return (
     <nav className="bg-gray-800 text-white">
-      <div className="mx-[5%] grid grid-cols-1 gap-4 py-3 sm:grid-cols-3 items-center">
-        <div className="flex justify-center sm:justify-start flex-1">
+      <div className="mx-[5%] flex flex-col sm:flex-row sm:justify-between items-center py-3">
+        {/* Logo */}
+        <div className="mb-2 sm:mb-0">
           <Link to="/" className="text-lg font-semibold hover:underline">
             Project Call Platform
           </Link>
         </div>
-        <div className="flex justify-center space-x-12 flex-1">
+
+        {/* Main links */}
+        <div className="flex justify-center flex-wrap gap-x-8 mb-2 sm:mb-0">
           <Link to="/" className="hover:underline">Home</Link>
-          <Link to="/calls" className="hover:underline">Calls</Link>
+          {token && <Link to="/calls" className="hover:underline">Calls</Link>}
           <Link to="/about" className="hover:underline">About</Link>
+          {token && role === 'applicant' && (
+            <Link to="/my-applications" className="hover:underline">
+              My Applications
+            </Link>
+          )}
+          {token && role === 'admin' && (
+            <Link to="/admin/calls" className="hover:underline">
+              Manage Calls
+            </Link>
+          )}
+          {token && role === 'reviewer' && (
+            <Link to="/reviewer" className="hover:underline">
+              My Reviews
+            </Link>
+          )}
         </div>
-        <div className="flex justify-center sm:justify-end space-x-6 flex-1">
-          <Link to="/login" className="bg-blue-500 px-3 py-1 rounded">Login</Link>
-          <Link to="/register" className="bg-green-500 px-3 py-1 rounded">Sign Up</Link>
+
+        {/* Auth buttons */}
+        <div className="flex justify-center sm:justify-end space-x-4">
+          {token ? (
+            <button onClick={logout} className="bg-blue-500 px-3 py-1 rounded">
+              Logout
+            </button>
+          ) : (
+            <>
+              <Link to="/auth" className="bg-blue-500 px-3 py-1 rounded">Login</Link>
+              <Link to="/auth" className="bg-green-500 px-3 py-1 rounded">Sign Up</Link>
+            </>
+          )}
         </div>
       </div>
     </nav>
   )
 }
 
-export default Navbar;
+export default Navbar

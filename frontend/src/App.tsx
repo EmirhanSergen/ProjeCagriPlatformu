@@ -1,31 +1,35 @@
+import React, { Suspense } from 'react'
+import { Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import { ToastProvider } from './components/ToastProvider'
-import RegisterPage from './pages/RegisterPage'
-import LoginPage from './pages/LoginPage'
-import CallsPage from './pages/CallsPage'
-import HomePage from './pages/HomePage'
-import AboutPage from './pages/AboutPage'
-import { Routes, Route } from 'react-router-dom'
-
-
+import { appRoutes } from './routes'
 
 function App() {
   return (
     <ToastProvider>
-      <div className="flex flex-col min-h-screen">
-        <Navbar />
-        <main className="max-w-md mx-auto p-4 space-y-8 flex-grow">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/calls" element={<CallsPage />} />
-          </Routes>
-        </main>
-      </div>
+        <div className="flex flex-col min-h-screen">
+          <Navbar />
+          <main className="w-full max-w-screen-2xl mx-auto p-4 space-y-8 flex-grow">
+            <Suspense fallback={<div className="text-center">Yükleniyor...</div>}>
+              <Routes>
+                {appRoutes.map((route, index) => {
+                  if ('children' in route && route.children) {
+                    return (
+                      <Route key={index} path={route.path} element={route.element}>
+                        {route.children.map((child, childIndex) => (
+                          <Route key={childIndex} index={child.index} path={child.path} element={child.element} />
+                        ))}
+                      </Route>
+                    )
+                  }
+                  return <Route key={index} path={route.path} element={route.element} />
+                })}
+              </Routes>
+            </Suspense>
+          </main>
+        </div>
     </ToastProvider>
-  );
+  )
 }
 
-export default App;
+export default App

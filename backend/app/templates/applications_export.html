@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; }
+        h1 { font-size: 20px; }
+        h2 { font-size: 16px; margin-top: 20px; }
+        .application { margin-bottom: 30px; }
+    </style>
+</head>
+<body>
+    <h1>{{ call.title }} - Applications</h1>
+    {% for app in applications %}
+    <div class="application">
+        <h2>Application #{{ app.id }} by User {{ app.user_id }}</h2>
+        <p>{{ app.content }}</p>
+        {% set app_attachments = attachments.get(app.id, []) %}
+        {% if app_attachments %}
+        <strong>Attachments:</strong>
+        <ul>
+            {% for att in app_attachments %}
+            <li>{{ att.file_name }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+    {% endfor %}
+</body>
+</html>

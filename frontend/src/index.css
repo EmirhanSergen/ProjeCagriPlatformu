@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Global resets and layout */
 body {
-  @apply m-0 min-h-screen;
+  @apply m-0 min-h-screen; /* Remove default margin, ensure full-height */
 }

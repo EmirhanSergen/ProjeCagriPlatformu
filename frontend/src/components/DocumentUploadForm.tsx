@@ -1,4 +1,3 @@
-import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -18,46 +17,30 @@ interface FormValues {
   documents: FileList
 }
 
-export default function DocumentUploadForm() {
+interface Props {
+  callId: number
+  documentId: number
+}
+
+export default function DocumentUploadForm({ callId, documentId }: Props) {
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
     reset,
   } = useForm<FormValues>({ resolver: zodResolver(schema) })
   const { showToast } = useToast()
-  const [progress, setProgress] = useState(0)
-  const intervalRef = useRef<number>()
 
   const onSubmit = handleSubmit(async ({ documents }) => {
     const files = Array.from(documents)
     try {
-      await uploadDocuments(files, setProgress)
+      await uploadDocuments(callId, documentId, files)
       showToast('Files uploaded successfully', 'success')
       reset()
     } catch {
       showToast('Failed to upload files', 'error')
-    } finally {
-      setProgress(0)
     }
   })
-
-  const watchedFiles = watch('documents')
-
-  useEffect(() => {
-    if (watchedFiles && watchedFiles.length > 0 && !intervalRef.current) {
-      intervalRef.current = window.setInterval(() => {
-        onSubmit()
-      }, 30000)
-    }
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
-        intervalRef.current = undefined
-      }
-    }
-  }, [watchedFiles, onSubmit])
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
@@ -73,14 +56,6 @@ export default function DocumentUploadForm() {
           <p className="text-red-600">{errors.documents.message}</p>
         )}
       </div>
-      {progress > 0 && (
-        <div className="w-full bg-gray-200 h-2 rounded">
-          <div
-            className="bg-blue-500 h-2 rounded"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-      )}
       <button className="bg-blue-500 text-white px-4 py-2 rounded" type="submit">
         Upload
       </button>
